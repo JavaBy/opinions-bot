@@ -1,11 +1,12 @@
 package by.jprof.telegram.opinions
 
 import by.dev.madhead.telek.model.Update
-import by.jprof.telegram.opinions.config.engineModule
+import by.jprof.telegram.opinions.config.dynamoModule
 import by.jprof.telegram.opinions.config.envModule
 import by.jprof.telegram.opinions.config.jsonModule
+import by.jprof.telegram.opinions.config.pipelineModule
 import by.jprof.telegram.opinions.config.telegramModule
-import by.jprof.telegram.opinions.processors.UpdateProcessingEngine
+import by.jprof.telegram.opinions.processors.UpdateProcessingPipeline
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent
@@ -25,17 +26,17 @@ val OK = APIGatewayV2ProxyResponseEvent().apply {
 @ImplicitReflectionSerializer
 class Handler : RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent>, KoinComponent {
     companion object {
-        val logger = LogManager.getLogger(Handler::class.java)
+        val logger = LogManager.getLogger(Handler::class.java)!!
     }
 
     init {
         startKoin {
-            modules(envModule, jsonModule, engineModule, telegramModule)
+            modules(envModule, jsonModule, dynamoModule, pipelineModule, telegramModule)
         }
     }
 
     private val json: Json by inject()
-    private val engine: UpdateProcessingEngine by inject()
+    private val pipeline: UpdateProcessingPipeline by inject()
 
     override fun handleRequest(input: APIGatewayV2ProxyRequestEvent, context: Context): APIGatewayV2ProxyResponseEvent {
         logger.debug("Incoming request: {}", input)
@@ -44,7 +45,7 @@ class Handler : RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyR
 
         logger.debug("Parsed update: {}", update)
 
-        engine.process(update)
+        pipeline.process(update)
 
         return OK
     }

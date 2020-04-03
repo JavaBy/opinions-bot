@@ -16,6 +16,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(platform("org.apache.logging.log4j:log4j-bom:2.13.1"))
     implementation(platform("com.fasterxml.jackson:jackson-bom:2.10.3"))
+    implementation(platform("software.amazon.awssdk:bom:2.11.9"))
     implementation("org.apache.logging.log4j:log4j-core")
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.amazonaws:aws-lambda-java-core:1.2.0")
@@ -24,7 +25,9 @@ dependencies {
     implementation("by.dev.madhead.telek:telek-hc:0.0.4")
     implementation("org.koin:koin-core:2.1.5")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.5")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0")
+    implementation("software.amazon.awssdk:dynamodb")
 
     testImplementation(platform("org.junit:junit-bom:5.6.0"))
     testRuntimeOnly(platform("org.junit:junit-bom:5.6.0"))
