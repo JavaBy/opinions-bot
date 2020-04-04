@@ -70,6 +70,7 @@ class JEPLinksProcessor(
                 val updatedVotes = votes.copy(votes = votes.votes + (callbackQuery.from.id.toString() to vote))
 
                 votesDAO.save(updatedVotes)
+                telek.answerCallbackQuery(AnswerCallbackQueryRequest(callbackQueryId = callbackQuery.id))
                 callbackQuery.message?.let { message ->
                     telek.editMessageReplyMarkup(EditMessageReplyMarkupRequest(
                             chatId = ChatId.of(message.chat.id),
@@ -84,7 +85,6 @@ class JEPLinksProcessor(
                             )
                     ))
                 }
-                telek.answerCallbackQuery(AnswerCallbackQueryRequest(callbackQueryId = callbackQuery.id))
             } else {
                 logger.debug("Unknown callback query. Skipping")
             }
