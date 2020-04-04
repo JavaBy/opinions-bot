@@ -8,6 +8,7 @@ import by.dev.madhead.telek.model.ParseMode
 import by.dev.madhead.telek.model.Update
 import by.dev.madhead.telek.model.communication.AnswerCallbackQueryRequest
 import by.dev.madhead.telek.model.communication.ChatId
+import by.dev.madhead.telek.model.communication.EditMessageReplyMarkupRequest
 import by.dev.madhead.telek.model.communication.SendMessageRequest
 import by.dev.madhead.telek.telek.Telek
 import by.jprof.telegram.opinions.dao.VotesDAO
@@ -65,16 +66,24 @@ class JEPLinksProcessor(
 
                 logger.debug("Tracking {}'s '{}' vote for {}", callbackQuery.from.id, vote, votesId)
 
-                val votes = votesDAO.get(votesId)
+                val votes = (votesDAO.get(votesId) ?: Votes(votesId))
+                val updatedVotes = votes.copy(votes = votes.votes + (callbackQuery.from.id.toString() to vote))
 
-                if (votes != null) {
-                    votesDAO.save(votes.copy(votes = votes.votes + (callbackQuery.from.id.toString() to vote)))
-                } else {
-                    logger.warn("Hmmm, votes not found!")
-
-                    votesDAO.save(Votes(votesId, mapOf(callbackQuery.from.id.toString() to vote)))
+                votesDAO.save(updatedVotes)
+                callbackQuery.message?.let { message ->
+                    telek.editMessageReplyMarkup(EditMessageReplyMarkupRequest(
+                            chatId = ChatId.of(message.chat.id),
+                            messageId = message.messageId,
+                            replyMarkup = InlineKeyboardMarkup(
+                                    inlineKeyboard = listOf(
+                                            listOf(
+                                                    InlineKeyboardButton(text = "${updatedVotes.upvotes} 👍", callbackData = "$votesId:+"),
+                                                    InlineKeyboardButton(text = "${updatedVotes.downvotes} 👎", callbackData = "$votesId:-")
+                                            )
+                                    )
+                            )
+                    ))
                 }
-
                 telek.answerCallbackQuery(AnswerCallbackQueryRequest(callbackQueryId = callbackQuery.id))
             } else {
                 logger.debug("Unknown callback query. Skipping")
@@ -94,18 +103,17 @@ class JEPLinksProcessor(
             telek.sendMessage(
                     SendMessageRequest(
                             chatId = ChatId.of(message.chat.id),
-                            text = """
-                                *JEP $jep ratings:*
-                                
-                                👍: ${votes.upvotes}
-                                
-                                👎: ${votes.downvotes}
-                                
-                                Cast your vote now\! ⤵️
-                            """.trimIndent(),
+                            text = "Cast your vote for *JEP $jep* now ⤵️",
                             parseMode = ParseMode.MarkdownV2,
                             replyToMessageId = message.messageId,
-                            replyMarkup = jepVotesReplyMarkup(votesId)
+                            replyMarkup = InlineKeyboardMarkup(
+                                    inlineKeyboard = listOf(
+                                            listOf(
+                                                    InlineKeyboardButton(text = "${votes.upvotes} 👍", callbackData = "$votesId:+"),
+                                                    InlineKeyboardButton(text = "${votes.downvotes} 👎", callbackData = "$votesId:-")
+                                            )
+                                    )
+                            )
                     )
             )
         } else {
@@ -115,10 +123,17 @@ class JEPLinksProcessor(
             telek.sendMessage(
                     SendMessageRequest(
                             chatId = ChatId.of(message.chat.id),
-                            text = "No votes on *JEP $jep* yet\\. Let's rate it\\! ⤵️",
+                            text = "Cast your vote for *JEP $jep* now ⤵️",
                             parseMode = ParseMode.MarkdownV2,
                             replyToMessageId = message.messageId,
-                            replyMarkup = jepVotesReplyMarkup(votesId)
+                            replyMarkup = InlineKeyboardMarkup(
+                                    inlineKeyboard = listOf(
+                                            listOf(
+                                                    InlineKeyboardButton(text = "👍", callbackData = "$votesId:+"),
+                                                    InlineKeyboardButton(text = "👎", callbackData = "$votesId:-")
+                                            )
+                                    )
+                            )
                     )
             )
         }
@@ -147,17 +162,6 @@ class JEPLinksProcessor(
     }
 
     private fun constructVotesID(jep: String) = "JEP-${jep}"
-
-    private fun jepVotesReplyMarkup(votesId: String): InlineKeyboardMarkup {
-        return InlineKeyboardMarkup(
-                inlineKeyboard = listOf(
-                        listOf(
-                                InlineKeyboardButton(text = "👍", callbackData = "$votesId:+"),
-                                InlineKeyboardButton(text = "👎", callbackData = "$votesId:-")
-                        )
-                )
-        )
-    }
 
     private val Votes.upvotes: Int
         get() = this.votes.count { (_, vote) -> vote == "+" }
