@@ -22,7 +22,7 @@ dependencies {
     implementation("com.amazonaws:aws-lambda-java-core:1.2.0")
     implementation("com.amazonaws:aws-lambda-java-events:2.2.7")
     implementation("com.amazonaws:aws-lambda-java-log4j2:1.1.0")
-    implementation("by.dev.madhead.telek:telek-hc:0.0.5.ALPHA")
+    implementation("by.dev.madhead.telek:telek-hc:0.0.6.ALPHA")
     implementation("org.koin:koin-core:2.1.5")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.5")
