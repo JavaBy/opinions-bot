@@ -26,7 +26,8 @@ export class OpinionsStack extends cdk.Stack {
 				'LOG_THRESHOLD': 'DEBUG',
 				'TELEGRAM_BOT_TOKEN': props.token,
 				'TABLE_VOTES': votestTable.tableName
-			}
+			},
+			tracing: lambda.Tracing.ACTIVE,
 		});
 
 		votestTable.grantReadWriteData(lambdaFunctionWebhook);

@@ -11,9 +11,11 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyResponseEvent
+import com.amazonaws.xray.entities.TraceHeader
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.json.Json
 import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.ThreadContext
 import org.koin.core.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.inject
@@ -39,6 +41,8 @@ class Handler : RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyR
     private val pipeline: UpdateProcessingPipeline by inject()
 
     override fun handleRequest(input: APIGatewayV2ProxyRequestEvent, context: Context): APIGatewayV2ProxyResponseEvent {
+        ThreadContext.put("AWSXRayTraceId", TraceHeader.fromString(System.getenv("_X_AMZN_TRACE_ID"))?.rootTraceId?.toString() ?: "UNKNOWN")
+
         logger.debug("Incoming request: {}", input)
 
         val update = json.parse(Update.serializer(), input.body ?: return OK)

@@ -13,6 +13,7 @@ import by.dev.madhead.telek.model.communication.SendMessageRequest
 import by.dev.madhead.telek.telek.Telek
 import by.jprof.telegram.opinions.dao.VotesDAO
 import by.jprof.telegram.opinions.entity.Votes
+import com.amazonaws.xray.AWSXRay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -28,65 +29,75 @@ class JEPLinksProcessor(
     }
 
     override suspend fun process(update: Update) {
-        val message = update.message
-        val callbackQuery = update.callbackQuery
+        AWSXRay.beginSubsegment("${this::class.simpleName}#process").use {
+            val message = update.message
+            val callbackQuery = update.callbackQuery
 
-        when {
-            message != null -> processMessage(message)
-            callbackQuery != null -> processCallbackQuery(callbackQuery)
+            when {
+                message != null -> processMessage(message)
+                callbackQuery != null -> processCallbackQuery(callbackQuery)
+            }
         }
     }
 
     private suspend fun processMessage(message: Message) {
-        logger.debug("Processing message")
+        AWSXRay.beginSubsegment("${this::class.simpleName}#processMessage").use {
+            logger.debug("Processing message")
 
-        val jepMentions = extractJEPMentions(message) ?: return
+            val jepMentions = AWSXRay.beginSubsegment("${this::class.simpleName}#extractJEPMentions").use {
+                extractJEPMentions(message) ?: return
+            }
 
-        logger.debug("JEP mentions: {}", jepMentions)
+            logger.debug("JEP mentions: {}", jepMentions)
 
-        supervisorScope {
-            jepMentions
-                    .map { launch { replyToJEPMention(it, message) } }
-                    .joinAll()
+            AWSXRay.beginSubsegment("${this::class.simpleName}#replyToJEPMentions").use {
+                supervisorScope {
+                    jepMentions
+                            .map { launch { replyToJEPMention(it, message) } }
+                            .joinAll()
+                }
+            }
         }
     }
 
     private suspend fun processCallbackQuery(callbackQuery: CallbackQuery) {
-        logger.debug("Processing callback query")
+        AWSXRay.beginSubsegment("${this::class.simpleName}#processCallbackQuery").use {
+            logger.debug("Processing callback query")
 
-        callbackQuery.data?.let { data ->
-            if (data.startsWith("JEP")) {
-                val (votesId, vote) = try {
-                    data.split(":")
-                } catch (e: Exception) {
-                    logger.warn("Bad callback data", e)
+            callbackQuery.data?.let { data ->
+                if (data.startsWith("JEP")) {
+                    val (votesId, vote) = try {
+                        data.split(":")
+                    } catch (e: Exception) {
+                        logger.warn("Bad callback data", e)
 
-                    return
+                        return
+                    }
+
+                    logger.debug("Tracking {}'s '{}' vote for {}", callbackQuery.from.id, vote, votesId)
+
+                    val votes = (votesDAO.get(votesId) ?: Votes(votesId))
+                    val updatedVotes = votes.copy(votes = votes.votes + (callbackQuery.from.id.toString() to vote))
+
+                    votesDAO.save(updatedVotes)
+                    telek.answerCallbackQuery(AnswerCallbackQueryRequest(callbackQueryId = callbackQuery.id))
+                    callbackQuery.message?.let { message ->
+                        telek.editMessageReplyMarkup(EditMessageReplyMarkupRequest(
+                                chatId = ChatId.of(message.chat.id),
+                                messageId = message.messageId,
+                                replyMarkup = InlineKeyboardMarkup(
+                                        inlineKeyboard = listOf(
+                                                listOf(
+                                                        InlineKeyboardButton(text = "${updatedVotes.upvotes} 👍", callbackData = "$votesId:+"),
+                                                        InlineKeyboardButton(text = "${updatedVotes.downvotes} 👎", callbackData = "$votesId:-")
+                                                )
+                                        )
+                                )
+                        ))
+                    }
+                } else {
+                    logger.debug("Unknown callback query. Skipping")
                 }
-
-                logger.debug("Tracking {}'s '{}' vote for {}", callbackQuery.from.id, vote, votesId)
-
-                val votes = (votesDAO.get(votesId) ?: Votes(votesId))
-                val updatedVotes = votes.copy(votes = votes.votes + (callbackQuery.from.id.toString() to vote))
-
-                votesDAO.save(updatedVotes)
-                telek.answerCallbackQuery(AnswerCallbackQueryRequest(callbackQueryId = callbackQuery.id))
-                callbackQuery.message?.let { message ->
-                    telek.editMessageReplyMarkup(EditMessageReplyMarkupRequest(
-                            chatId = ChatId.of(message.chat.id),
-                            messageId = message.messageId,
-                            replyMarkup = InlineKeyboardMarkup(
-                                    inlineKeyboard = listOf(
-                                            listOf(
-                                                    InlineKeyboardButton(text = "${updatedVotes.upvotes} 👍", callbackData = "$votesId:+"),
-                                                    InlineKeyboardButton(text = "${updatedVotes.downvotes} 👎", callbackData = "$votesId:-")
-                                            )
-                                    )
-                            )
-                    ))
-                }
-            } else {
-                logger.debug("Unknown callback query. Skipping")
             }
         }
     }

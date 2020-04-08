@@ -1,6 +1,7 @@
 package by.jprof.telegram.opinions.processors
 
 import by.dev.madhead.telek.model.Update
+import com.amazonaws.xray.AWSXRay
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -16,10 +17,12 @@ class UpdateProcessingPipeline(
     }
 
     fun process(update: Update) = runBlocking {
-        supervisorScope {
-            processors
-                    .map { launch(exceptionHandler(it)) { it.process(update) } }
-                    .joinAll()
+        AWSXRay.beginSubsegment("UpdateProcessingPipeline#process").use {
+            supervisorScope {
+                processors
+                        .map { launch(exceptionHandler(it)) { it.process(update) } }
+                        .joinAll()
+            }
         }
     }
 

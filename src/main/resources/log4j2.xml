@@ -6,6 +6,7 @@
 				<Complete>false</Complete>
 				<Compact>true</Compact>
 				<KeyValuePair key="AWSRequestId" value="$${ctx:AWSRequestId}"/>
+				<KeyValuePair key="AWSXRayTraceId" value="$${ctx:AWSXRayTraceId}"/>
 			</JsonLayout>
 		</Lambda>
 	</Appenders>
