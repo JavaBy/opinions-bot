@@ -1,6 +1,7 @@
 package by.jprof.telegram.opinions.processors
 
-import by.dev.madhead.telek.model.Update
+
+import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
