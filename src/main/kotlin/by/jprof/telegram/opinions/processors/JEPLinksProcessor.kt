@@ -5,7 +5,6 @@ import by.dev.madhead.telek.model.InlineKeyboardButton
 import by.dev.madhead.telek.model.InlineKeyboardMarkup
 import by.dev.madhead.telek.model.Message
 import by.dev.madhead.telek.model.ParseMode
-import by.dev.madhead.telek.model.Update
 import by.dev.madhead.telek.model.communication.AnswerCallbackQueryRequest
 import by.dev.madhead.telek.model.communication.ChatId
 import by.dev.madhead.telek.model.communication.EditMessageReplyMarkupRequest
@@ -13,6 +12,7 @@ import by.dev.madhead.telek.model.communication.SendMessageRequest
 import by.dev.madhead.telek.telek.Telek
 import by.jprof.telegram.opinions.dao.VotesDAO
 import by.jprof.telegram.opinions.entity.Votes
+import by.jprof.telegram.opinions.model.Update
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -28,8 +28,9 @@ class JEPLinksProcessor(
     }
 
     override suspend fun process(update: Update) {
-        val message = update.message
-        val callbackQuery = update.callbackQuery
+
+        val message = update.oldUpdate?.message
+        val callbackQuery = update.oldUpdate?.callbackQuery
 
         when {
             message != null -> processMessage(message)

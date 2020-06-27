@@ -17,7 +17,7 @@ internal class YoutubeDaoIT {
 
     @Test
     fun `dao returns true if key is present`() = runBlocking {
-        val checkLocalstackStarted = "Check that instance of local dynamo db, we suggest to use localstack"
+        val checkLocalstackStarted = "Check that instance of local dynamo db is started, we suggest to use localstack"
         assertNotNull(dynamoDB, checkLocalstackStarted)
         val youtubeDAO = YoutubeDAO(dynamoDB, "youtube-whitelist")
         assertTrue(youtubeDAO.isInWhiteList("TEST-125"), checkLocalstackStarted)
@@ -28,7 +28,7 @@ internal class YoutubeDaoIT {
         override fun region(): String = dummy
         override fun accessKey(): String = dummy
         override fun secretKey(): String  = dummy
-        override fun url(): String = "http://localhost:4569"
+        override fun url(): String = "http://localhost:4569" //default for localstack
     }
 
 }

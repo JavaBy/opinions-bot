@@ -1,6 +1,7 @@
 package by.jprof.telegram.opinions.processors
 
-import by.dev.madhead.telek.model.Update
+import by.jprof.telegram.opinions.model.Update
+import by.dev.madhead.telek.model.Update as MadHeadLibUpdate
 import kotlinx.coroutines.delay
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -24,7 +25,7 @@ internal class UpdateProcessingPipelineTest {
 
         Assertions.assertTrue(
                 measureTimeMillis {
-                    pipeline.process(Update(updateId = 1))
+                    pipeline.process(Update(MadHeadLibUpdate(updateId = 1), null))
                 } < testProcessors * testProcessingDelay
         )
     }
@@ -56,7 +57,7 @@ internal class UpdateProcessingPipelineTest {
                 )
         )
 
-        pipeline.process(Update(updateId = 1))
+        pipeline.process(Update(MadHeadLibUpdate(updateId = 1), null))
 
         Assertions.assertTrue(states.all { it })
     }

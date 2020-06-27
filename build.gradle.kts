@@ -28,6 +28,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.5")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0")
     implementation("software.amazon.awssdk:dynamodb")
+    implementation("com.google.api-client:google-api-client:1.23.0")
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.23.0")
+    implementation("com.google.apis:google-api-services-youtube:v3-rev222-1.25.0")
+    implementation("com.github.insanusmokrassar:TelegramBotAPI-all:0.27.6")
 
     testImplementation(platform("org.junit:junit-bom:5.6.0"))
     testRuntimeOnly(platform("org.junit:junit-bom:5.6.0"))
@@ -47,5 +51,8 @@ tasks {
     }
     test {
         useJUnitPlatform()
+        filter {
+            includeTestsMatching("*Test")
+        }
     }
 }
