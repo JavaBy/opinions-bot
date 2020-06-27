@@ -7,13 +7,13 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.supervisorScope
-import org.apache.logging.log4j.LogManager
+import org.slf4j.LoggerFactory
 
 class UpdateProcessingPipeline(
         private val processors: List<UpdateProcessor>
 ) {
     companion object {
-        val logger = LogManager.getLogger(UpdateProcessingPipeline::class.java)!!
+        val logger = LoggerFactory.getLogger(UpdateProcessingPipeline::class.java)!!
     }
 
     fun process(update: Update) = runBlocking {

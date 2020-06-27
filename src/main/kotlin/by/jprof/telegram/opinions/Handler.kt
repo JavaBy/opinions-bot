@@ -11,10 +11,10 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyResponseEve
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.UpdateDeserializationStrategy
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.json.Json
-import org.apache.logging.log4j.LogManager
 import org.koin.core.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.inject
+import org.slf4j.LoggerFactory
 
 val OK = APIGatewayV2ProxyResponseEvent().apply {
     statusCode = 200
@@ -24,12 +24,12 @@ val OK = APIGatewayV2ProxyResponseEvent().apply {
 @ImplicitReflectionSerializer
 class Handler : RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent>, KoinComponent {
     companion object {
-        val logger = LogManager.getLogger(Handler::class.java)!!
+        val logger = LoggerFactory.getLogger(Handler::class.java)!!
     }
 
     init {
         startKoin {
-            modules(envModule, jsonModule, dynamoModule, pipelineModule, youtubeModule, telegramModule)
+            modules(envModule, jsonModule, dynamoModule, youtubeModule, pipelineModule, telegramModule)
         }
     }
 

@@ -16,14 +16,14 @@ import by.jprof.telegram.opinions.model.Update
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
-import org.apache.logging.log4j.LogManager
+import org.slf4j.LoggerFactory
 
 class JEPLinksProcessor(
         private val telek: Telek,
         private val votesDAO: VotesDAO
 ) : UpdateProcessor {
     companion object {
-        val logger = LogManager.getLogger(JEPLinksProcessor::class.java)
+        val logger = LoggerFactory.getLogger(JEPLinksProcessor::class.java)
         val siteRegex = "https?://openjdk\\.java\\.net/jeps/(\\d+)/?".toRegex()
     }
 

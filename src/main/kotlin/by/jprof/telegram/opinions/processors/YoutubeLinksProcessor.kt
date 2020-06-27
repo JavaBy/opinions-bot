@@ -8,37 +8,41 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.CallbackQuery.CallbackQu
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.URLTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.abstracts.ContentMessage
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.TextContent
-import org.apache.logging.log4j.LogManager
+import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
+import org.slf4j.LoggerFactory
 
 class YoutubeLinksProcessor(val bot: RequestsExecutor, val youtubeDAO: YoutubeDAO) : UpdateProcessor {
     companion object {
-        val logger = LogManager.getLogger(JEPLinksProcessor::class.java)!!
+        val logger = LoggerFactory.getLogger(YoutubeLinksProcessor::class.java)!!
         val siteRegex = """
             http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?
         """.trimIndent().toRegex()
     }
 
     override suspend fun process(update: Update) {
+        logger.debug("Processing update {}", update.newUpdate)
         when (update.newUpdate) {
-            is ContentMessage<*> -> processMessage(update.newUpdate)
+            is MessageUpdate -> processMessage(update.newUpdate)
             is CallbackQuery -> processCallback(update.newUpdate)
         }
     }
 
-    private fun processMessage(message: ContentMessage<*>) {
-        logger.debug("Processing the message")
-        val youtubeLinks = (message.content as? TextContent)?.let {
-            it.entities.justTextSources().filter { textSource ->
-                textSource is URLTextSource && siteRegex.matches(textSource.source)
+    private suspend fun processMessage(update: MessageUpdate) {
+        logger.debug("Processing the message {}", update)
+        val youtubeLinks = (update.data as? ContentMessage<*>)?.let { msg ->
+            (msg.content as? TextContent).let {
+                it?.entities?.justTextSources()?.filter { textSource ->
+                    textSource is URLTextSource && siteRegex.matches(textSource.source)
+                }
             }
         }
 
-        youtubeLinks?.forEach { _ ->
-            logger.debug("YouTube Link found in message, processing...")
+        youtubeLinks?.forEach { link ->
+            logger.debug("YouTube Link found in message, processing... ${link.source}")
         }
     }
 
-    private fun processCallback(callback: CallbackQuery) {
+    private suspend fun processCallback(callback: CallbackQuery) {
         TODO("Not yet implemented")
     }
 
