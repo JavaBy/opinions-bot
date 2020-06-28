@@ -98,12 +98,13 @@ class YoutubeLinksProcessor(
                     logger.debug("$channelId is in a white list")
                     val videoText = "${"Vote for video: $youtubeLink".boldMarkdownV2()} \n$description " +
                             "\nLikes: $likes Dislikes: $dislikes".boldMarkdownV2() //trim indent have strange layout
+                    val votes = votesDAO.get(videoId) ?: Votes(videoId)
                     bot.sendMessage(
                             chatId = update.data.chat.id,
                             text = videoText,
                             parseMode = MarkdownV2ParseMode,
                             replyToMessageId = update.data.messageId,
-                            replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(Votes(videoId), videoId))
+                            replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, videoId))
                     )
                 } else {
                     logger.debug("$channelId is not in a white list")
