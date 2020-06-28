@@ -2,7 +2,7 @@ package by.jprof.telegram.opinions.processors
 
 import by.jprof.telegram.opinions.dao.VotesDAO
 import by.jprof.telegram.opinions.dao.YoutubeDAO
-import by.jprof.telegram.opinions.entity.*
+import by.jprof.telegram.opinions.entity.Votes
 import com.github.insanusmokrassar.TelegramBotAPI.CommonAbstracts.TextSource
 import com.github.insanusmokrassar.TelegramBotAPI.CommonAbstracts.justTextSources
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
@@ -33,10 +33,10 @@ class YoutubeLinksProcessor(
 ) : UpdateProcessor {
 
     companion object {
-        val logger = LogManager.getLogger(YoutubeLinksProcessor::class.java)!!
-        const val VIDEO_ID_GROUP_INDEX = 1
-        const val ACCEPTED_DISPLAY_LEN = 500
-        val siteRegex = """
+        private val logger = LogManager.getLogger(YoutubeLinksProcessor::class.java)!!
+        private const val VIDEO_ID_GROUP_INDEX = 1
+        private const val ACCEPTED_DISPLAY_LEN = 500
+        private val siteRegex = """
             http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?
         """.trimIndent().toRegex()
     }
@@ -81,8 +81,8 @@ class YoutubeLinksProcessor(
             val channelId = snippet.channelId
             val title = snippet.title
             val likes = videoDetails.statistics.likeCount
-            val dislikes =  videoDetails.statistics.dislikeCount
-            val rawDescription = if (snippet.description.length > ACCEPTED_DISPLAY_LEN ) {
+            val dislikes = videoDetails.statistics.dislikeCount
+            val rawDescription = if (snippet.description.length > ACCEPTED_DISPLAY_LEN) {
                 snippet.description.substring(IntRange(0, ACCEPTED_DISPLAY_LEN)) + "..."
             } else {
                 snippet.description
@@ -98,12 +98,13 @@ class YoutubeLinksProcessor(
                     logger.debug("$channelId is in a white list")
                     val videoText = "${"Vote for video: $youtubeLink".boldMarkdownV2()} \n$description " +
                             "\nLikes: $likes Dislikes: $dislikes".boldMarkdownV2() //trim indent have strange layout
+                    val votes = getVotesByYoutubeId(videoId)
                     bot.sendMessage(
                             chatId = update.data.chat.id,
                             text = videoText,
                             parseMode = MarkdownV2ParseMode,
                             replyToMessageId = update.data.messageId,
-                            replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(Votes(videoId), videoId))
+                            replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, videoId))
                     )
                 } else {
                     logger.debug("$channelId is not in a white list")
@@ -119,13 +120,18 @@ class YoutubeLinksProcessor(
 
     }
 
+    private suspend fun getVotesByYoutubeId(videoId: String): Votes {
+        val id = "YOUTUBE-$videoId"
+        return votesDAO.get(id) ?: Votes(id)
+    }
+
     private suspend fun processCallback(callbackUpdate: CallbackQueryUpdate) {
         val callbackQuery = callbackUpdate.data
         logger.debug("process callback: $callbackQuery")
         if (callbackQuery is MessageDataCallbackQuery) {
 
-            val (votesId, vote) = callbackQuery.data.split(":")
-            val votes = votesDAO.get(votesId) ?: Votes(votesId)
+            val (youtubeVideoId, vote) = callbackQuery.data.split(":")
+            val votes = getVotesByYoutubeId(youtubeVideoId)
             val fromUserId = callbackQuery.user.id.chatId.toString()
             val updatedVotes = votes.copy(votes = votes.votes + (fromUserId to vote))
 
@@ -133,13 +139,12 @@ class YoutubeLinksProcessor(
             bot.answerCallbackQuery(callbackQuery = callbackQuery)
 
             bot.editMessageReplyMarkup(
-                    message= callbackQuery.message,
-                    replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, votesId))
+                    message = callbackQuery.message,
+                    replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, youtubeVideoId))
             )
 
         }
     }
-
 
 
 }

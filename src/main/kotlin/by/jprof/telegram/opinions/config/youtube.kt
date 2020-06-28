@@ -17,12 +17,9 @@ val youtubeModule = module {
         val theKey = get<String>(named(YOUTUBE_API_TOKEN))
         val initializer = YouTubeRequestInitializer(theKey)
         YouTube.Builder(httpTransport, jsonFactory, null)
+                .setApplicationName("opinions-bot")
                 .setYouTubeRequestInitializer(initializer)
                 .build()
-    }
-
-    single {
-        YoutubeDAO(get(), get(named(YOUTUBE_CHANNELS_WHITELIST_TABLE)))
     }
 
 

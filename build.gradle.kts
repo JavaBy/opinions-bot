@@ -12,6 +12,19 @@ repositories {
     maven("https://dl.bintray.com/madhead/maven")
 }
 
+sourceSets {
+    create("intTest") {
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
+    }
+}
+
+val intTestImplementation: Configuration by configurations.getting {
+    extendsFrom(configurations.implementation.get())
+}
+
+configurations["intTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
+
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(platform("org.apache.logging.log4j:log4j-bom:2.13.1"))
@@ -29,7 +42,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0")
     implementation("software.amazon.awssdk:dynamodb")
     implementation("com.google.api-client:google-api-client:1.23.0")
-    implementation("com.google.oauth-client:google-oauth-client-jetty:1.23.0")
     implementation("com.google.apis:google-api-services-youtube:v3-rev222-1.25.0")
     implementation("com.github.insanusmokrassar:TelegramBotAPI-all:0.27.6")
 
@@ -39,7 +51,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testRuntimeOnly("org.apache.logging.log4j:log4j-core")
-    testImplementation("by.dev.madhead.aws-junit5:dynamo-v2:5.0.4")
+    intTestImplementation("by.dev.madhead.aws-junit5:dynamo-v2:5.0.4")
 }
 
 tasks {
