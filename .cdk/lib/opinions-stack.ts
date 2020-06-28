@@ -14,6 +14,11 @@ export class OpinionsStack extends cdk.Stack {
 			partitionKey: {name: 'id', type: dynamodb.AttributeType.STRING},
 			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
 		});
+		const youtubeChannelsWhitelistTable = new dynamodb.Table(this, 'opinions-youtube-channels-whitelist', {
+			tableName: 'opinions-youtube-channels-whitelist',
+			partitionKey: {name: 'channelId', type: dynamodb.AttributeType.STRING},
+			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+		});
 
 		const lambdaFunctionWebhook = new lambda.Function(this, 'opinions-webhook', {
 			functionName: 'opinions-webhook',
@@ -24,8 +29,10 @@ export class OpinionsStack extends cdk.Stack {
 			handler: 'by.jprof.telegram.opinions.Handler',
 			environment: {
 				'LOG_THRESHOLD': 'DEBUG',
-				'TELEGRAM_BOT_TOKEN': props.token,
-				'TABLE_VOTES': votestTable.tableName
+				'TELEGRAM_BOT_TOKEN': props.telegramToken,
+				'YOUTUBE_API_TOKEN': props.youtubeToken,
+				'TABLE_VOTES': votestTable.tableName,
+				'TABLE_YOUTUBE_CHANNELS_WHITELIST': youtubeChannelsWhitelistTable.tableName,
 			}
 		});
 
@@ -43,6 +50,6 @@ export class OpinionsStack extends cdk.Stack {
 			},
 		});
 
-		api.root.addResource(props.token.replace(':', '_')).addMethod('POST', new apigateway.LambdaIntegration(lambdaFunctionWebhook));
+		api.root.addResource(props.telegramToken.replace(':', '_')).addMethod('POST', new apigateway.LambdaIntegration(lambdaFunctionWebhook));
 	}
 }

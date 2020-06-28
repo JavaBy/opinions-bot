@@ -7,13 +7,17 @@ import {OpinionsStack} from '../lib/opinions-stack';
 if (process.env.TELEGRAM_BOT_TOKEN == null) {
 	throw new Error('Undefined TELEGRAM_BOT_TOKEN')
 }
+if (process.env.TABLE_YOUTUBE_CHANNELS_WHITELIST == null) {
+	throw new Error('Undefined TABLE_YOUTUBE_CHANNELS_WHITELIST')
+}
 
 const app = new cdk.App();
 new OpinionsStack(
 		app,
 		'OpinionsStack',
 		{
-			token: process.env.TELEGRAM_BOT_TOKEN,
+			telegramToken: process.env.TELEGRAM_BOT_TOKEN,
+			youtubeToken: process.env.TABLE_YOUTUBE_CHANNELS_WHITELIST,
 			env: {
 				region: 'eu-west-2'
 			}
