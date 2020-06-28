@@ -17,7 +17,7 @@ val pipelineModule = module {
     }
 
     single<UpdateProcessor>(named("YoutubeLinksProcessor")) {
-        YoutubeLinksProcessor(get(), get())
+        YoutubeLinksProcessor(get(), get(), get(), get())
     }
 
 }

@@ -1,8 +1,6 @@
 package by.jprof.telegram.opinions
 
-import by.dev.madhead.telek.model.Update as OldUpdate
 import by.jprof.telegram.opinions.config.*
-import by.jprof.telegram.opinions.model.Update
 import by.jprof.telegram.opinions.processors.UpdateProcessingPipeline
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
@@ -14,7 +12,7 @@ import kotlinx.serialization.json.Json
 import org.koin.core.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.inject
-import org.slf4j.LoggerFactory
+import org.apache.logging.log4j.LogManager
 
 val OK = APIGatewayV2ProxyResponseEvent().apply {
     statusCode = 200
@@ -24,12 +22,12 @@ val OK = APIGatewayV2ProxyResponseEvent().apply {
 @ImplicitReflectionSerializer
 class Handler : RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent>, KoinComponent {
     companion object {
-        val logger = LoggerFactory.getLogger(Handler::class.java)!!
+        val logger = LogManager.getLogger(Handler::class.java)!!
     }
 
     init {
         startKoin {
-            modules(envModule, jsonModule, dynamoModule, youtubeModule, pipelineModule, telegramModule)
+            modules(envModule, jsonModule, dynamoModule, youtubeModule, telegramModule, pipelineModule)
         }
     }
 
@@ -39,10 +37,8 @@ class Handler : RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyR
     override fun handleRequest(input: APIGatewayV2ProxyRequestEvent, context: Context): APIGatewayV2ProxyResponseEvent {
         logger.debug("Incoming request: {}", input)
 
-        val oldUpdate = json.parse(OldUpdate.serializer(), input.body ?: return OK)
-        val newUpdate = json.parse(UpdateDeserializationStrategy, input.body ?: return OK)
-        val update  = Update(oldUpdate, newUpdate) //TODO: move jep processor to new updates after youtube part
-        logger.debug("Parsed update: {}", oldUpdate)
+        val update = json.parse(UpdateDeserializationStrategy, input.body ?: return OK)
+        logger.debug("Parsed update: {}", update)
 
         pipeline.process(update)
 
