@@ -26,19 +26,20 @@ class RemoveYoutubeChannelBotCommand(
             val chatId = ChatId(chatIdentifier)
             val searchCriteria = parameters[0]
 
-            val channelDataRequest = youtubeApi.channels().list("statistics, snippet")
-            val response = ChannelResponseData(resp = channelDataRequest.setId(searchCriteria).execute())
+            val response = ChannelResponseData(resp = newChannelRequest().setId(searchCriteria).execute())
             val total = response.total
             if (total > 0) { //found
                 removeChannel(response, chatId)
             } else {
                 val userNameSearchResponse =
-                        ChannelResponseData(resp = channelDataRequest.setForUsername(searchCriteria).execute())
+                        ChannelResponseData(resp = newChannelRequest().setForUsername(searchCriteria).execute())
                 removeChannel(userNameSearchResponse, chatId)
             }
 
         }
     }
+
+    private fun newChannelRequest() = youtubeApi.channels().list("statistics,snippet")
 
     private fun removeChannel(userNameSearchResponse: ChannelResponseData, chatId: ChatId) {
         userNameSearchResponse.channelId?.let {
