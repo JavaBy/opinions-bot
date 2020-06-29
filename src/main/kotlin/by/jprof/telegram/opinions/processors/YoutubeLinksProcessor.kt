@@ -2,7 +2,7 @@ package by.jprof.telegram.opinions.processors
 
 import by.jprof.telegram.opinions.dao.VotesDAO
 import by.jprof.telegram.opinions.dao.YoutubeDAO
-import by.jprof.telegram.opinions.entity.*
+import by.jprof.telegram.opinions.entity.Votes
 import com.github.insanusmokrassar.TelegramBotAPI.CommonAbstracts.TextSource
 import com.github.insanusmokrassar.TelegramBotAPI.CommonAbstracts.justTextSources
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
@@ -81,8 +81,8 @@ class YoutubeLinksProcessor(
             val channelId = snippet.channelId
             val title = snippet.title
             val likes = videoDetails.statistics.likeCount
-            val dislikes =  videoDetails.statistics.dislikeCount
-            val rawDescription = if (snippet.description.length > ACCEPTED_DISPLAY_LEN ) {
+            val dislikes = videoDetails.statistics.dislikeCount
+            val rawDescription = if (snippet.description.length > ACCEPTED_DISPLAY_LEN) {
                 snippet.description.substring(IntRange(0, ACCEPTED_DISPLAY_LEN)) + "..."
             } else {
                 snippet.description
@@ -134,13 +134,12 @@ class YoutubeLinksProcessor(
             bot.answerCallbackQuery(callbackQuery = callbackQuery)
 
             bot.editMessageReplyMarkup(
-                    message= callbackQuery.message,
+                    message = callbackQuery.message,
                     replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, votesId))
             )
 
         }
     }
-
 
 
 }
