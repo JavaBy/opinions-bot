@@ -9,7 +9,7 @@ class YouTubeRegexTest {
          val siteRegex = """
             http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?
         """.trimIndent().toRegex()
-    }
+     }
 
     @Test
     fun `id is at index 1 on full link`() {
