@@ -34,7 +34,9 @@ class YoutubeLinksProcessor(
     companion object {
         private val logger = LogManager.getLogger(YoutubeLinksProcessor::class.java)!!
         private const val ACCEPTED_DISPLAY_LEN = 500
-        val youTubeLinkRegex = "^.*((youtu.be\\/)|(v\\/)|(\\/u\\/\\w\\/)|(embed\\/)|(watch\\?))\\??v?=?([^#\\&\\?]*).*".toRegex()
+
+        // TODO: https://twitter.com/shipilev/status/934133677445042176 passes this regex!
+        private val youTubeLinkRegex = "^.*((youtu.be\\/)|(v\\/)|(\\/u\\/\\w\\/)|(embed\\/)|(watch\\?))\\??v?=?([^#\\&\\?]*).*".toRegex()
 
         internal val String.youTubeVideoId: String?
             get() {
@@ -94,6 +96,7 @@ class YoutubeLinksProcessor(
         val videoDetails = response.items.first()
         val snippet = videoDetails.snippet
         val channelId = snippet.channelId
+        val views = videoDetails.statistics.viewCount
         val likes = videoDetails.statistics.likeCount
         val dislikes = videoDetails.statistics.dislikeCount
         val rawDescription = if (snippet.description.length > ACCEPTED_DISPLAY_LEN) {
@@ -108,8 +111,9 @@ class YoutubeLinksProcessor(
 
             if (youtubeDAO.isInWhiteList(channelId)) {
                 logger.debug("$channelId is in a white list")
-                val videoText = "${"Cast your vote for video: $videoId".boldMarkdownV2()} \n$description " +
-                        "\nLikes: $likes Dislikes: $dislikes".boldMarkdownV2() //trim indent have strange layout
+                val videoText = "Cast your vote for: ${snippet.title}\n\n".boldMarkdownV2() +
+                        "$description\n\n" +
+                        "Views: $views / Likes: $likes / Dislikes: $dislikes".boldMarkdownV2() //trim indent have strange layout
                 val votes = getVotesByYoutubeId(videoId)
                 bot.sendMessage(
                         chatId = update.data.chat.id,
