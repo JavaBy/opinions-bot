@@ -3,7 +3,6 @@ package by.jprof.telegram.opinions.processors
 import by.jprof.telegram.opinions.dao.VotesDAO
 import by.jprof.telegram.opinions.dao.YoutubeDAO
 import by.jprof.telegram.opinions.entity.Votes
-import com.github.insanusmokrassar.TelegramBotAPI.CommonAbstracts.justTextSources
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.answers.answerCallbackQuery
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.edit.ReplyMarkup.editMessageReplyMarkup
@@ -16,6 +15,7 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.ParseMode.MarkdownV2Pars
 import com.github.insanusmokrassar.TelegramBotAPI.types.buttons.InlineKeyboardMarkup
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.abstracts.ContentMessage
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.TextContent
+import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.fullEntitiesList
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.CallbackQueryUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
@@ -33,15 +33,20 @@ class YoutubeLinksProcessor(
 ) : UpdateProcessor {
     companion object {
         private val logger = LogManager.getLogger(YoutubeLinksProcessor::class.java)!!
-        private const val VIDEO_ID_GROUP_INDEX = 1
         private const val ACCEPTED_DISPLAY_LEN = 500
-        val siteRegex = """
-            http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?
-        """.trimIndent().toRegex()
+        val youTubeLinkRegex = "^.*((youtu.be\\/)|(v\\/)|(\\/u\\/\\w\\/)|(embed\\/)|(watch\\?))\\??v?=?([^#\\&\\?]*).*".toRegex()
+
+        internal val String.youTubeVideoId: String?
+            get() {
+                val (_, _, _, _, _, _, id) = youTubeLinkRegex.matchEntire(this)?.destructured ?: return null
+
+                return id
+            }
     }
 
     override suspend fun process(update: Update) {
         logger.debug("Processing update {}", update)
+
         when (update) {
             is MessageUpdate -> processMessage(update)
             is CallbackQueryUpdate -> processCallback(update)
@@ -51,67 +56,70 @@ class YoutubeLinksProcessor(
     private fun processMessage(update: MessageUpdate) {
         logger.debug("Processing the message {}", update)
 
-        val youtubeLinks = extractYoutubeLinks(update)
+        val videoIds = extractYoutubeVideoIds(update)
 
-        youtubeLinks?.let {
-            logger.debug("Youtube links extracted: ${youtubeLinks.size}")
-        }
-        youtubeLinks?.forEach { link ->
+        logger.debug("Found YouTube videos: $videoIds")
+
+        videoIds?.forEach { link ->
             sendVoteForVideoMessage(link, update)
         }
     }
 
-    private fun extractYoutubeLinks(update: MessageUpdate): List<String>? {
+    private fun extractYoutubeVideoIds(update: MessageUpdate): List<String>? {
         return (update.data as ContentMessage<*>).let { msg ->
-            (msg.content as? TextContent).let { textContent ->
-                textContent?.entities?.justTextSources()
-                        ?.mapNotNull {
-                            (it as? URLTextSource)?.source ?: (it as? TextLinkTextSource)?.url
-                        }
-                        ?.filter {
-                            siteRegex.matches(it)
+            (msg.content as? TextContent)?.let { textContent ->
+                textContent
+                        .fullEntitiesList()
+                        .let { entities ->
+                            entities
+                                    .mapNotNull {
+                                        when (it) {
+                                            is TextLinkTextSource -> it.url
+                                            is URLTextSource -> it.source
+                                            else -> null
+                                        }
+                                    }
+                                    .mapNotNull {
+                                        it.youTubeVideoId
+                                    }
                         }
             }
         }
     }
 
-    private fun sendVoteForVideoMessage(youtubeLink: String, update: MessageUpdate) {
-        val regexGroups = siteRegex.matchEntire(youtubeLink)?.groupValues
+    private fun sendVoteForVideoMessage(videoId: String, update: MessageUpdate) {
+        logger.debug("Youtube video id is: $videoId")
 
-        regexGroups?.get(VIDEO_ID_GROUP_INDEX)?.let { videoId ->
-            logger.debug("Youtube video id is: $videoId")
-            val response = youTube.videos().list("snippet,statistics").setId(videoId).execute()
+        val response = youTube.videos().list("snippet,statistics").setId(videoId).execute()
+        val videoDetails = response.items.first()
+        val snippet = videoDetails.snippet
+        val channelId = snippet.channelId
+        val likes = videoDetails.statistics.likeCount
+        val dislikes = videoDetails.statistics.dislikeCount
+        val rawDescription = if (snippet.description.length > ACCEPTED_DISPLAY_LEN) {
+            snippet.description.substring(IntRange(0, ACCEPTED_DISPLAY_LEN)) + "…"
+        } else {
+            snippet.description
+        }
+        val description = rawDescription.escapeMarkdownV2Common()
 
-            val videoDetails = response.items.first()
-            val snippet = videoDetails.snippet
-            val channelId = snippet.channelId
-            val likes = videoDetails.statistics.likeCount
-            val dislikes = videoDetails.statistics.dislikeCount
-            val rawDescription = if (snippet.description.length > ACCEPTED_DISPLAY_LEN) {
-                snippet.description.substring(IntRange(0, ACCEPTED_DISPLAY_LEN)) + "…"
+        runBlocking {
+            logger.debug("checking if $channelId is in a white list")
+
+            if (youtubeDAO.isInWhiteList(channelId)) {
+                logger.debug("$channelId is in a white list")
+                val videoText = "${"Cast your vote for video: $videoId".boldMarkdownV2()} \n$description " +
+                        "\nLikes: $likes Dislikes: $dislikes".boldMarkdownV2() //trim indent have strange layout
+                val votes = getVotesByYoutubeId(videoId)
+                bot.sendMessage(
+                        chatId = update.data.chat.id,
+                        text = videoText,
+                        parseMode = MarkdownV2ParseMode,
+                        replyToMessageId = update.data.messageId,
+                        replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, videoId))
+                )
             } else {
-                snippet.description
-            }
-
-            val description = rawDescription.escapeMarkdownV2Common()
-
-            runBlocking {
-                logger.debug("checking if $channelId is in a white list")
-                if (youtubeDAO.isInWhiteList(channelId)) {
-                    logger.debug("$channelId is in a white list")
-                    val videoText = "${"Cast your vote for video: $youtubeLink".boldMarkdownV2()} \n$description " +
-                            "\nLikes: $likes Dislikes: $dislikes".boldMarkdownV2() //trim indent have strange layout
-                    val votes = getVotesByYoutubeId(videoId)
-                    bot.sendMessage(
-                            chatId = update.data.chat.id,
-                            text = videoText,
-                            parseMode = MarkdownV2ParseMode,
-                            replyToMessageId = update.data.messageId,
-                            replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, videoId))
-                    )
-                } else {
-                    logger.debug("$channelId is not in a white list")
-                }
+                logger.debug("$channelId is not in a white list")
             }
         }
     }
@@ -128,7 +136,6 @@ class YoutubeLinksProcessor(
         logger.debug("process callback: $callbackQuery")
 
         if (callbackQuery is MessageDataCallbackQuery) {
-
             val (youtubeVideoId, vote) = callbackQuery.data.split(":")
             val votes = getVotesByYoutubeId(youtubeVideoId)
             val fromUserId = callbackQuery.user.id.chatId.toString()
@@ -136,7 +143,6 @@ class YoutubeLinksProcessor(
 
             votesDAO.save(updatedVotes)
             bot.answerCallbackQuery(callbackQuery = callbackQuery)
-
             bot.editMessageReplyMarkup(
                     message = callbackQuery.message,
                     replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, youtubeVideoId))
