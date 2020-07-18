@@ -3,7 +3,6 @@ package by.jprof.telegram.opinions.processors
 import by.jprof.telegram.opinions.dao.VotesDAO
 import by.jprof.telegram.opinions.dao.YoutubeDAO
 import by.jprof.telegram.opinions.entity.Votes
-import com.github.insanusmokrassar.TelegramBotAPI.CommonAbstracts.TextSource
 import com.github.insanusmokrassar.TelegramBotAPI.CommonAbstracts.justTextSources
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.answers.answerCallbackQuery
@@ -11,6 +10,7 @@ import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.edit.ReplyMarku
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.sendMessage
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.utils.formatting.boldMarkdownV2
 import com.github.insanusmokrassar.TelegramBotAPI.types.CallbackQuery.MessageDataCallbackQuery
+import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.TextLinkTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.URLTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.ParseMode.MarkdownV2ParseMode
 import com.github.insanusmokrassar.TelegramBotAPI.types.buttons.InlineKeyboardMarkup
@@ -56,17 +56,21 @@ class YoutubeLinksProcessor(
         youtubeLinks?.let {
             logger.debug("Youtube links extracted: ${youtubeLinks.size}")
         }
-        youtubeLinks?.forEach { msgText ->
-            sendVoteForVideoMessage(msgText.source, update)
+        youtubeLinks?.forEach { link ->
+            sendVoteForVideoMessage(link, update)
         }
     }
 
-    private fun extractYoutubeLinks(update: MessageUpdate): List<TextSource>? {
+    private fun extractYoutubeLinks(update: MessageUpdate): List<String>? {
         return (update.data as ContentMessage<*>).let { msg ->
-            (msg.content as? TextContent).let {
-                it?.entities?.justTextSources()?.filter { textSource ->
-                    textSource is URLTextSource && siteRegex.matches(textSource.source)
-                }
+            (msg.content as? TextContent).let { textContent ->
+                textContent?.entities?.justTextSources()
+                        ?.mapNotNull {
+                            (it as? URLTextSource)?.source ?: (it as? TextLinkTextSource)?.url
+                        }
+                        ?.filter {
+                            siteRegex.matches(it)
+                        }
             }
         }
     }
