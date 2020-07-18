@@ -1,12 +1,15 @@
 package by.jprof.telegram.opinions.processors
 
-import by.dev.madhead.telek.model.Update
+import com.github.insanusmokrassar.TelegramBotAPI.types.UpdateIdentifier
+import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
 import kotlinx.coroutines.delay
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import kotlin.system.measureTimeMillis
 
-internal class UpdateProcessingPipelineTest {
+data class MockUpdate(override val data: Any, override val updateId: UpdateIdentifier) : Update
+
+class UpdateProcessingPipelineTest {
     @Test
     fun process() {
         val testProcessingDelay = 1000L
@@ -24,7 +27,7 @@ internal class UpdateProcessingPipelineTest {
 
         Assertions.assertTrue(
                 measureTimeMillis {
-                    pipeline.process(Update(updateId = 1))
+                    pipeline.process(MockUpdate(1, 1))
                 } < testProcessors * testProcessingDelay
         )
     }
@@ -56,7 +59,7 @@ internal class UpdateProcessingPipelineTest {
                 )
         )
 
-        pipeline.process(Update(updateId = 1))
+        pipeline.process(MockUpdate(1, 1))
 
         Assertions.assertTrue(states.all { it })
     }

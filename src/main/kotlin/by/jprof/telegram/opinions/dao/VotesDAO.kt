@@ -5,7 +5,6 @@ import by.jprof.telegram.opinions.entity.toAttributeValues
 import by.jprof.telegram.opinions.entity.toVotes
 import kotlinx.coroutines.future.await
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 class VotesDAO(
         private val dynamoDb: DynamoDbAsyncClient,
@@ -21,7 +20,7 @@ class VotesDAO(
     suspend fun get(id: String): Votes? {
         return dynamoDb.getItem {
             it.tableName(table)
-            it.key(mapOf("id" to AttributeValue.builder().s(id).build()))
+            it.key(mapOf("id" to id.toAttributeValue()))
         }.await()?.item()?.takeUnless { it.isEmpty() }?.toVotes()
     }
 }

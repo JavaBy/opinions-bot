@@ -1,16 +1,17 @@
 package by.jprof.telegram.opinions
 
-import by.dev.madhead.telek.model.Update
 import by.jprof.telegram.opinions.config.dynamoModule
 import by.jprof.telegram.opinions.config.envModule
 import by.jprof.telegram.opinions.config.jsonModule
 import by.jprof.telegram.opinions.config.pipelineModule
 import by.jprof.telegram.opinions.config.telegramModule
+import by.jprof.telegram.opinions.config.youtubeModule
 import by.jprof.telegram.opinions.processors.UpdateProcessingPipeline
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyResponseEvent
+import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.UpdateDeserializationStrategy
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.json.Json
 import org.apache.logging.log4j.LogManager
@@ -31,7 +32,7 @@ class Handler : RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyR
 
     init {
         startKoin {
-            modules(envModule, jsonModule, dynamoModule, pipelineModule, telegramModule)
+            modules(envModule, jsonModule, dynamoModule, youtubeModule, telegramModule, pipelineModule)
         }
     }
 
@@ -41,7 +42,7 @@ class Handler : RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyR
     override fun handleRequest(input: APIGatewayV2ProxyRequestEvent, context: Context): APIGatewayV2ProxyResponseEvent {
         logger.debug("Incoming request: {}", input)
 
-        val update = json.parse(Update.serializer(), input.body ?: return OK)
+        val update = json.parse(UpdateDeserializationStrategy, input.body ?: return OK)
 
         logger.debug("Parsed update: {}", update)
 
