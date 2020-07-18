@@ -1,6 +1,7 @@
 package by.jprof.telegram.opinions.config
 
 import by.jprof.telegram.opinions.processors.JEPLinksProcessor
+import by.jprof.telegram.opinions.processors.KotlinMentionsProcessor
 import by.jprof.telegram.opinions.processors.UpdateProcessingPipeline
 import by.jprof.telegram.opinions.processors.UpdateProcessor
 import by.jprof.telegram.opinions.processors.YoutubeLinksProcessor
@@ -18,5 +19,9 @@ val pipelineModule = module {
 
     single<UpdateProcessor>(named("YoutubeLinksProcessor")) {
         YoutubeLinksProcessor(get(), get(), get(), get())
+    }
+
+    single<UpdateProcessor>(named("KotlinMentionsProcessor")) {
+        KotlinMentionsProcessor(get(), get(), get<String>(named("KOTLIN_MENTIONS_COOLDOWN_MS")).toLong())
     }
 }

@@ -19,6 +19,11 @@ export class OpinionsStack extends cdk.Stack {
 			partitionKey: {name: 'channelId', type: dynamodb.AttributeType.STRING},
 			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
 		});
+		const kotlinMentionsTable = new dynamodb.Table(this, 'opinions-kotlin-mentions', {
+			tableName: 'opinions-kotlin-mentions',
+			partitionKey: {name: 'chatId', type: dynamodb.AttributeType.STRING},
+			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+		});
 
 		const lambdaFunctionWebhook = new lambda.Function(this, 'opinions-webhook', {
 			functionName: 'opinions-webhook',
@@ -33,11 +38,14 @@ export class OpinionsStack extends cdk.Stack {
 				'YOUTUBE_API_TOKEN': props.youtubeToken,
 				'TABLE_VOTES': votestTable.tableName,
 				'TABLE_YOUTUBE_CHANNELS_WHITELIST': youtubeChannelsWhitelistTable.tableName,
+				'TABLE_KOTLIN_MENTIONS': kotlinMentionsTable.tableName,
+				'KOTLIN_MENTIONS_COOLDOWN_MS': Math.floor(Duration.days(1 / 2).toMilliseconds()).toString(),
 			}
 		});
 
 		votestTable.grantReadWriteData(lambdaFunctionWebhook);
-		youtubeChannelsWhitelistTable.grantReadData(lambdaFunctionWebhook)
+		youtubeChannelsWhitelistTable.grantReadData(lambdaFunctionWebhook);
+		kotlinMentionsTable.grantReadWriteData(lambdaFunctionWebhook);
 
 		const api = new apigateway.RestApi(this, 'opinions-bot', {
 			restApiName: 'opinions-bot',

@@ -1,5 +1,6 @@
 package by.jprof.telegram.opinions.config
 
+import by.jprof.telegram.opinions.dao.KotlinMentionsDAO
 import by.jprof.telegram.opinions.dao.VotesDAO
 import by.jprof.telegram.opinions.dao.YoutubeDAO
 import org.koin.core.qualifier.named
@@ -22,6 +23,13 @@ val dynamoModule = module {
         YoutubeDAO(
                 get(),
                 get(named(TABLE_YOUTUBE_CHANNELS_WHITELIST))
+        )
+    }
+
+    single {
+        KotlinMentionsDAO(
+                get(),
+                get(named(TABLE_KOTLIN_MENTIONS))
         )
     }
 }
