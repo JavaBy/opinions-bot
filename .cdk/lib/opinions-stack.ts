@@ -37,6 +37,7 @@ export class OpinionsStack extends cdk.Stack {
 		});
 
 		votestTable.grantReadWriteData(lambdaFunctionWebhook);
+		youtubeChannelsWhitelistTable.grantReadData(lambdaFunctionWebhook)
 
 		const api = new apigateway.RestApi(this, 'opinions-bot', {
 			restApiName: 'opinions-bot',
