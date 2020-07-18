@@ -83,7 +83,7 @@ class YoutubeLinksProcessor(
             val likes = videoDetails.statistics.likeCount
             val dislikes = videoDetails.statistics.dislikeCount
             val rawDescription = if (snippet.description.length > ACCEPTED_DISPLAY_LEN) {
-                snippet.description.substring(IntRange(0, ACCEPTED_DISPLAY_LEN)) + "..."
+                snippet.description.substring(IntRange(0, ACCEPTED_DISPLAY_LEN)) + "…"
             } else {
                 snippet.description
             }
