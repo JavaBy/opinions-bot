@@ -31,7 +31,6 @@ class YoutubeLinksProcessor(
         private val youtubeDAO: YoutubeDAO,
         private val youTube: YouTube
 ) : UpdateProcessor {
-
     companion object {
         private val logger = LogManager.getLogger(YoutubeLinksProcessor::class.java)!!
         private const val VIDEO_ID_GROUP_INDEX = 1
@@ -51,7 +50,9 @@ class YoutubeLinksProcessor(
 
     private fun processMessage(update: MessageUpdate) {
         logger.debug("Processing the message {}", update)
+
         val youtubeLinks = extractYoutubeLinks(update)
+
         youtubeLinks?.let {
             logger.debug("Youtube links extracted: ${youtubeLinks.size}")
         }
@@ -72,6 +73,7 @@ class YoutubeLinksProcessor(
 
     private fun sendVoteForVideoMessage(youtubeLink: String, update: MessageUpdate) {
         val regexGroups = siteRegex.matchEntire(youtubeLink)?.groupValues
+
         regexGroups?.get(VIDEO_ID_GROUP_INDEX)?.let { videoId ->
             logger.debug("Youtube video id is: $videoId")
             val response = youTube.videos().list("snippet,statistics").setId(videoId).execute()
@@ -112,12 +114,15 @@ class YoutubeLinksProcessor(
 
     private suspend fun getVotesByYoutubeId(videoId: String): Votes {
         val id = "YOUTUBE-$videoId"
+
         return votesDAO.get(id) ?: Votes(id)
     }
 
     private suspend fun processCallback(callbackUpdate: CallbackQueryUpdate) {
         val callbackQuery = callbackUpdate.data
+
         logger.debug("process callback: $callbackQuery")
+
         if (callbackQuery is MessageDataCallbackQuery) {
 
             val (youtubeVideoId, vote) = callbackQuery.data.split(":")
@@ -132,9 +137,6 @@ class YoutubeLinksProcessor(
                     message = callbackQuery.message,
                     replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, youtubeVideoId))
             )
-
         }
     }
-
-
 }

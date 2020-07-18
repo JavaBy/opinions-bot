@@ -3,7 +3,6 @@ package by.jprof.telegram.opinions.dao
 import by.jprof.telegram.opinions.entity.Votes
 import by.jprof.telegram.opinions.entity.toAttributeValues
 import by.jprof.telegram.opinions.entity.toVotes
-import by.jprof.telegram.opinions.extension.toAttributeValue
 import kotlinx.coroutines.future.await
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 

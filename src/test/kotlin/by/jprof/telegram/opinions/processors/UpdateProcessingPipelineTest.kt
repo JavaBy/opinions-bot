@@ -9,7 +9,7 @@ import kotlin.system.measureTimeMillis
 
 data class MockUpdate(override val data: Any, override val updateId: UpdateIdentifier) : Update
 
-internal class UpdateProcessingPipelineTest {
+class UpdateProcessingPipelineTest {
     @Test
     fun process() {
         val testProcessingDelay = 1000L
@@ -27,7 +27,7 @@ internal class UpdateProcessingPipelineTest {
 
         Assertions.assertTrue(
                 measureTimeMillis {
-                    pipeline.process(MockUpdate(1,1))
+                    pipeline.process(MockUpdate(1, 1))
                 } < testProcessors * testProcessingDelay
         )
     }
@@ -59,7 +59,7 @@ internal class UpdateProcessingPipelineTest {
                 )
         )
 
-        pipeline.process(MockUpdate(1,1))
+        pipeline.process(MockUpdate(1, 1))
 
         Assertions.assertTrue(states.all { it })
     }

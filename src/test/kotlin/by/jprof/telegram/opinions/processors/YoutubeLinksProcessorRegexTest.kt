@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class YoutubeLinksProcessorRegexTest {
-     companion object {
-         val siteRegex = YoutubeLinksProcessor.siteRegex
-     }
+    companion object {
+        val siteRegex = YoutubeLinksProcessor.siteRegex
+    }
 
     @Test
     fun `id is at index 1 on full link`() {
@@ -36,5 +36,4 @@ class YoutubeLinksProcessorRegexTest {
 
         assertFalse(id.isNullOrBlank())
     }
-
 }

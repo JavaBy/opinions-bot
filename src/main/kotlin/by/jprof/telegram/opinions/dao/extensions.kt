@@ -1,4 +1,4 @@
-package by.jprof.telegram.opinions.extension
+package by.jprof.telegram.opinions.dao
 
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 

@@ -1,7 +1,7 @@
 package by.jprof.telegram.opinions.processors
 
 import by.jprof.telegram.opinions.dao.VotesDAO
-import by.jprof.telegram.opinions.entity.*
+import by.jprof.telegram.opinions.entity.Votes
 import com.github.insanusmokrassar.TelegramBotAPI.CommonAbstracts.TextSource
 import com.github.insanusmokrassar.TelegramBotAPI.CommonAbstracts.justTextSources
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
@@ -118,5 +118,4 @@ class JEPLinksProcessor(
     private fun isUrlOrTextLink(it: TextSource) = it is URLTextSource || it is TextLinkTextSource
 
     private fun constructVotesID(jep: String) = "JEP-${jep}"
-
 }
