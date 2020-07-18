@@ -12,17 +12,16 @@ import org.junit.jupiter.api.extension.ExtendWith
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 
 @ExtendWith(DynamoDB::class)
-internal class YoutubeDaoIT {
+class YoutubeDaoIT {
 
     @AWSClient(endpoint = Endpoint::class)
     lateinit var dynamoDB: DynamoDbAsyncClient
 
     @Test
     fun daoReturnTrueIfKeyIsPresentInAWhiteList() = runBlocking {
-        val checkLocalStackStarted = "Check that instance of local dynamo db is started, we suggest to use localstack"
-        assertNotNull(dynamoDB, checkLocalStackStarted)
+        assertNotNull(dynamoDB)
         val youtubeDAO = YoutubeDAO(dynamoDB, "youtube-whitelist")
-        assertTrue(youtubeDAO.isInWhiteList("TEST-125"), checkLocalStackStarted)
+        assertTrue(youtubeDAO.isInWhiteList("TEST-125"))
     }
 
     class Endpoint : AWSEndpoint {

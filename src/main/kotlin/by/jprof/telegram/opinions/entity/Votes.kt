@@ -1,5 +1,6 @@
 package by.jprof.telegram.opinions.entity
 
+import by.jprof.telegram.opinions.extension.toAttributeValue
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 const val DOWN_VOTE = "\uD83D\uDC4E"
@@ -11,11 +12,11 @@ data class Votes(
 )
 
 fun Votes.toAttributeValues(): Map<String, AttributeValue> = mapOf(
-        "id" to AttributeValue.builder().s(this.id).build(),
+        "id" to this.id.toAttributeValue(),
         "votes" to AttributeValue.builder().m(
                 this
                         .votes
-                        .mapValues { (_, value) -> AttributeValue.builder().s(value).build() }
+                        .mapValues { (_, value) -> value.toAttributeValue()}
         ).build()
 )
 

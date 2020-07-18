@@ -36,7 +36,7 @@ class YoutubeLinksProcessor(
         private val logger = LogManager.getLogger(YoutubeLinksProcessor::class.java)!!
         private const val VIDEO_ID_GROUP_INDEX = 1
         private const val ACCEPTED_DISPLAY_LEN = 500
-        private val siteRegex = """
+        val siteRegex = """
             http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?
         """.trimIndent().toRegex()
     }
@@ -79,7 +79,6 @@ class YoutubeLinksProcessor(
             val videoDetails = response.items.first()
             val snippet = videoDetails.snippet
             val channelId = snippet.channelId
-            val title = snippet.title
             val likes = videoDetails.statistics.likeCount
             val dislikes = videoDetails.statistics.dislikeCount
             val rawDescription = if (snippet.description.length > ACCEPTED_DISPLAY_LEN) {
@@ -90,13 +89,11 @@ class YoutubeLinksProcessor(
 
             val description = rawDescription.escapeMarkdownV2Common()
 
-
-
             runBlocking {
                 logger.debug("checking if $channelId is in a white list")
                 if (youtubeDAO.isInWhiteList(channelId)) {
                     logger.debug("$channelId is in a white list")
-                    val videoText = "${"Vote for video: $youtubeLink".boldMarkdownV2()} \n$description " +
+                    val videoText = "${"Cast your vote for video: $youtubeLink".boldMarkdownV2()} \n$description " +
                             "\nLikes: $likes Dislikes: $dislikes".boldMarkdownV2() //trim indent have strange layout
                     val votes = getVotesByYoutubeId(videoId)
                     bot.sendMessage(
@@ -108,16 +105,9 @@ class YoutubeLinksProcessor(
                     )
                 } else {
                     logger.debug("$channelId is not in a white list")
-                    bot.sendMessage(
-                            chatId = update.data.chat.id,
-                            text = "Channel of ${title.escapeMarkdownV2Common()} video is not in the group whitelist",
-                            parseMode = MarkdownV2ParseMode,
-                            replyToMessageId = update.data.messageId
-                    )
                 }
             }
         }
-
     }
 
     private suspend fun getVotesByYoutubeId(videoId: String): Votes {

@@ -1,5 +1,6 @@
 package by.jprof.telegram.opinions.dao
 
+import by.jprof.telegram.opinions.extension.toAttributeValue
 import kotlinx.coroutines.future.await
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
@@ -18,22 +19,7 @@ class YoutubeDAO(
         return !item.isNullOrEmpty()
     }
 
-    suspend fun addToWhiteList(channelId: String) {
-        dynamoDB.putItem {
-            it.tableName(whiteListTable)
-            it.item(channelId.toYoutubeWhiteListItem())
-        }.await()
-    }
-
-    suspend fun removeFromWhiteList(channelId: String) {
-        dynamoDB.deleteItem {
-            it.tableName(whiteListTable)
-            it.key(channelId.toYoutubeWhiteListItem())
-        }.await()
-    }
-
 }
 
-private fun String.toAttributeValue(): AttributeValue = AttributeValue.builder().s(this).build()
 private fun String.toYoutubeWhiteListItem(): Map<String, AttributeValue> =
         mapOf("channelId" to this.toAttributeValue())

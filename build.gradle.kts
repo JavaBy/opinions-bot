@@ -9,7 +9,6 @@ plugins {
 
 repositories {
     jcenter()
-    maven("https://dl.bintray.com/madhead/maven")
 }
 
 sourceSets {
