@@ -1,5 +1,6 @@
 package by.jprof.telegram.opinions.config
 
+import by.jprof.telegram.opinions.dao.MentionsDAO
 import by.jprof.telegram.opinions.dao.VotesDAO
 import by.jprof.telegram.opinions.dao.YoutubeDAO
 import org.koin.core.qualifier.named
@@ -8,7 +9,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 
 val dynamoModule = module {
     single {
-        DynamoDbAsyncClient.builder().build()
+        DynamoDbAsyncClient.create()
     }
 
     single {
@@ -22,6 +23,13 @@ val dynamoModule = module {
         YoutubeDAO(
                 get(),
                 get(named(TABLE_YOUTUBE_CHANNELS_WHITELIST))
+        )
+    }
+
+    single {
+        MentionsDAO(
+                get(),
+                get(named(TABLE_MENTIONS))
         )
     }
 }

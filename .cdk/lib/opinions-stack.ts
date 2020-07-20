@@ -9,6 +9,11 @@ export class OpinionsStack extends cdk.Stack {
 	constructor(scope: cdk.Construct, id: string, props: OpinionsStackProps) {
 		super(scope, id, props);
 
+		const mentionsTable = new dynamodb.Table(this, 'opinions-mentions', {
+			tableName: 'opinions-mentions',
+			partitionKey: {name: 'id', type: dynamodb.AttributeType.STRING},
+			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+		});
 		const votestTable = new dynamodb.Table(this, 'opinions-votes', {
 			tableName: 'opinions-votes',
 			partitionKey: {name: 'id', type: dynamodb.AttributeType.STRING},
@@ -31,11 +36,13 @@ export class OpinionsStack extends cdk.Stack {
 				'LOG_THRESHOLD': 'DEBUG',
 				'TELEGRAM_BOT_TOKEN': props.telegramToken,
 				'YOUTUBE_API_TOKEN': props.youtubeToken,
+				'TABLE_MENTIONS': mentionsTable.tableName,
 				'TABLE_VOTES': votestTable.tableName,
 				'TABLE_YOUTUBE_CHANNELS_WHITELIST': youtubeChannelsWhitelistTable.tableName,
 			}
 		});
 
+		mentionsTable.grantReadWriteData(lambdaFunctionWebhook);
 		votestTable.grantReadWriteData(lambdaFunctionWebhook);
 		youtubeChannelsWhitelistTable.grantReadData(lambdaFunctionWebhook)
 
