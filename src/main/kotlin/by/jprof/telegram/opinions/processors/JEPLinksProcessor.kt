@@ -79,7 +79,7 @@ class JEPLinksProcessor(
 
                     bot.editMessageReplyMarkup(
                             message = callbackQuery.message,
-                            replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, votesId))
+                            replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(updatedVotes, votesId))
                     )
 
                 } else {

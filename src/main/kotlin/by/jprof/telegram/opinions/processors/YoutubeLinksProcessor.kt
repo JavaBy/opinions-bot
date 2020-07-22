@@ -130,7 +130,7 @@ class YoutubeLinksProcessor(
 
             bot.editMessageReplyMarkup(
                     message = callbackQuery.message,
-                    replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, youtubeVideoId))
+                    replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(updatedVotes, youtubeVideoId))
             )
 
         }
