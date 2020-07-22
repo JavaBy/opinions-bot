@@ -1,8 +1,7 @@
 package by.jprof.telegram.opinions.processors
 
 import by.jprof.telegram.opinions.dao.VotesDAO
-import by.jprof.telegram.opinions.entity.*
-import com.github.insanusmokrassar.TelegramBotAPI.CommonAbstracts.TextSource
+import by.jprof.telegram.opinions.entity.Votes
 import com.github.insanusmokrassar.TelegramBotAPI.CommonAbstracts.justTextSources
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.answers.answerCallbackQuery
@@ -106,17 +105,16 @@ class JEPLinksProcessor(
 
     private fun extractJEPMentions(message: Message): List<String>? {
         return (message as ContentMessage<*>).let { msg ->
-            (msg.content as? TextContent).let { textSource ->
-                textSource?.entities?.justTextSources()
-                        ?.filter { isUrlOrTextLink(it) }
-                        ?.mapNotNull { siteRegex.matchEntire(it.source)?.destructured }
+            (msg.content as? TextContent).let { textContent ->
+                textContent?.entities?.justTextSources()
+                        ?.mapNotNull {
+                            (it as? URLTextSource)?.source ?: (it as? TextLinkTextSource)?.url
+                        }
+                        ?.mapNotNull { siteRegex.matchEntire(it)?.destructured }
                         ?.map { (jep) -> jep }
             }
         }
     }
 
-    private fun isUrlOrTextLink(it: TextSource) = it is URLTextSource || it is TextLinkTextSource
-
     private fun constructVotesID(jep: String) = "JEP-${jep}"
-
 }

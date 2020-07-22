@@ -50,6 +50,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testRuntimeOnly("org.apache.logging.log4j:log4j-core")
+    testImplementation("io.mockk:mockk:1.10.0")
     intTestImplementation("by.dev.madhead.aws-junit5:dynamo-v2:5.0.4")
 }
 

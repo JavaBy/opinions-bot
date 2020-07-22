@@ -1,6 +1,11 @@
 package by.jprof.telegram.opinions
 
-import by.jprof.telegram.opinions.config.*
+import by.jprof.telegram.opinions.config.dynamoModule
+import by.jprof.telegram.opinions.config.envModule
+import by.jprof.telegram.opinions.config.jsonModule
+import by.jprof.telegram.opinions.config.pipelineModule
+import by.jprof.telegram.opinions.config.telegramModule
+import by.jprof.telegram.opinions.config.youtubeModule
 import by.jprof.telegram.opinions.processors.UpdateProcessingPipeline
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
@@ -9,10 +14,10 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyResponseEve
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.UpdateDeserializationStrategy
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.json.Json
+import org.apache.logging.log4j.LogManager
 import org.koin.core.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.inject
-import org.apache.logging.log4j.LogManager
 
 val OK = APIGatewayV2ProxyResponseEvent().apply {
     statusCode = 200
@@ -38,6 +43,7 @@ class Handler : RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyR
         logger.debug("Incoming request: {}", input)
 
         val update = json.parse(UpdateDeserializationStrategy, input.body ?: return OK)
+
         logger.debug("Parsed update: {}", update)
 
         pipeline.process(update)

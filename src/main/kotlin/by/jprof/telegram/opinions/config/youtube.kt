@@ -9,17 +9,15 @@ import org.koin.dsl.module
 
 
 val youtubeModule = module {
-
     single {
-        val httpTransport = GoogleNetHttpTransport.newTrustedTransport()
-        val jsonFactory = JacksonFactory.getDefaultInstance()
-        val theKey = get<String>(named(YOUTUBE_API_TOKEN))
-        val initializer = YouTubeRequestInitializer(theKey)
-        YouTube.Builder(httpTransport, jsonFactory, null)
+        YouTube
+                .Builder(
+                        GoogleNetHttpTransport.newTrustedTransport(),
+                        JacksonFactory.getDefaultInstance(),
+                        null
+                )
                 .setApplicationName("opinions-bot")
-                .setYouTubeRequestInitializer(initializer)
+                .setYouTubeRequestInitializer(YouTubeRequestInitializer(get<String>(named(YOUTUBE_API_TOKEN))))
                 .build()
     }
-
-
 }

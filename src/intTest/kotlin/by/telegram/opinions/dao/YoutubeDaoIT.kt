@@ -13,7 +13,6 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 
 @ExtendWith(DynamoDB::class)
 class YoutubeDaoIT {
-
     @AWSClient(endpoint = Endpoint::class)
     lateinit var dynamoDB: DynamoDbAsyncClient
 
@@ -31,5 +30,4 @@ class YoutubeDaoIT {
         override fun secretKey(): String = dummy
         override fun url(): String = "http://localhost:4569" //default for localstack
     }
-
 }

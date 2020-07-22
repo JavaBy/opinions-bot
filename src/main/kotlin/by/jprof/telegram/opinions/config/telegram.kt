@@ -7,9 +7,7 @@ import org.koin.dsl.module
 
 @ImplicitReflectionSerializer
 val telegramModule = module {
-
     single {
         telegramBot(get(named(TELEGRAM_BOT_TOKEN)))
     }
-
 }
