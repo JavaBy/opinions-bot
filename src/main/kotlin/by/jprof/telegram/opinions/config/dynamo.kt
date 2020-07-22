@@ -1,6 +1,6 @@
 package by.jprof.telegram.opinions.config
 
-import by.jprof.telegram.opinions.dao.MentionsDAO
+import by.jprof.telegram.opinions.dao.KotlinMentionsDAO
 import by.jprof.telegram.opinions.dao.VotesDAO
 import by.jprof.telegram.opinions.dao.YoutubeDAO
 import org.koin.core.qualifier.named
@@ -27,9 +27,9 @@ val dynamoModule = module {
     }
 
     single {
-        MentionsDAO(
+        KotlinMentionsDAO(
                 get(),
-                get(named(TABLE_MENTIONS))
+                get(named(TABLE_KOTLIN_MENTIONS))
         )
     }
 }

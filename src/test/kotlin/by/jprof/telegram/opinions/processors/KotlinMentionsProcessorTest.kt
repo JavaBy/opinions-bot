@@ -1,12 +1,11 @@
 package by.jprof.telegram.opinions.processors
 
-import by.jprof.telegram.opinions.dao.MentionsDAO
+import by.jprof.telegram.opinions.dao.KotlinMentionsDAO
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.media.sendSticker
 import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.InputFile
 import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.Request
 import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.toInputFile
-import com.github.insanusmokrassar.TelegramBotAPI.requests.send.SendTextMessage
 import com.github.insanusmokrassar.TelegramBotAPI.types.ChatId
 import com.github.insanusmokrassar.TelegramBotAPI.types.ChatIdentifier
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageIdentifier
@@ -17,9 +16,17 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.TextCont
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.media.StickerContent
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.soywiz.klock.DateTime
-import io.mockk.*
+import io.mockk.Called
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.confirmVerified
+import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.slot
+import io.mockk.unmockkAll
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -31,23 +38,23 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 @ExtendWith(MockKExtension::class)
-class MentionsProcessorTest {
+class KotlinMentionsProcessorTest {
     @RelaxedMockK
     private lateinit var reqExecutorMock: RequestsExecutor
 
     @RelaxedMockK
-    private lateinit var mentionsDAOMock: MentionsDAO
+    private lateinit var kotlinMentionsDAOMock: KotlinMentionsDAO
     private val expectedChatId = ChatId(1L)
     private val expectedStickerMessageId: MessageIdentifier = 1L
     private val expectedPeriodReplyMessageId: MessageIdentifier = 2L
-    private val expectedStickerFileId = MentionsProcessor.zeroDaysWithoutKotlinStickerFileId.toInputFile()
+    private val expectedStickerFileId = KotlinMentionsProcessor.zeroDaysWithoutKotlinStickerFileId.toInputFile()
 
     @BeforeEach
     fun setUp() {
         val contentMessage = mockk<ContentMessage<StickerContent>>(relaxed = true) {
             every { messageId } returns expectedPeriodReplyMessageId
         }
-        coEvery { mentionsDAOMock.getKotlinLastMentionAt(any()) } returns null
+        coEvery { kotlinMentionsDAOMock.getKotlinLastMentionAt(any()) } returns null
         mockkStatic("com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.media.SendStickerKt")
         coEvery { reqExecutorMock.sendSticker(any(), any(), replyToMessageId = any()) } returns contentMessage
     }
@@ -61,7 +68,7 @@ class MentionsProcessorTest {
     @Test
     fun `test second reply shouldn't be send if less than X hours spent since first reply`() = runBlocking {
         testStickerWasSent("I don't like kotlin")
-        coEvery { mentionsDAOMock.getKotlinLastMentionAt(any()) } returns Instant.now()
+        coEvery { kotlinMentionsDAOMock.getKotlinLastMentionAt(any()) } returns Instant.now()
         processUpdate("I don't like kotlin")
         // check by number of invocations that reply wasn't sent
         assertSticker()
@@ -74,7 +81,7 @@ class MentionsProcessorTest {
 
         // emulate some delay by shifting 'last-mention' value back
         coEvery {
-            mentionsDAOMock.getKotlinLastMentionAt(any())
+            kotlinMentionsDAOMock.getKotlinLastMentionAt(any())
         } returns Instant.now().minus(2, ChronoUnit.HOURS)
 
         processUpdate("I don't like kotlin")
@@ -86,7 +93,7 @@ class MentionsProcessorTest {
     @Test
     fun `test compose without mention message`() {
         val now = Instant.parse("2020-07-20T23:30:30.0Z")
-        val message = MentionsProcessor.composeWithoutMentionDurationMessage(
+        val message = KotlinMentionsProcessor.composeWithoutMentionDurationMessage(
                 Duration.between(now
                         .minus(1, ChronoUnit.DAYS)
                         .minus(2, ChronoUnit.HOURS)
@@ -134,7 +141,7 @@ class MentionsProcessorTest {
     }
 
     private suspend fun processUpdate(message: String) {
-        val processor = MentionsProcessor(reqExecutorMock, mentionsDAOMock)
+        val processor = KotlinMentionsProcessor(reqExecutorMock, kotlinMentionsDAOMock)
         processor.process(MessageUpdate(1L, mockMessage(message)))
     }
 

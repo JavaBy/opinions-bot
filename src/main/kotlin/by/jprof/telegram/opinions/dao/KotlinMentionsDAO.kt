@@ -5,23 +5,24 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import java.time.Instant
 
-class MentionsDAO(
+class KotlinMentionsDAO(
         private val dynamoDb: DynamoDbAsyncClient,
         private val table: String
 ) {
     companion object {
-        private const val ID_ATTR = "id"
-        private const val VALUE_ATTR = "value"
+        private const val ID_ATTR = "chatId"
+        private const val VALUE_ATTR = "timestamp"
     }
 
     suspend fun updateKotlinLastMentionAt(id: String, instant: Instant) {
         dynamoDb.putItem {
             it.tableName(table)
-            it.item(mapOf(
-                    ID_ATTR to AttributeValue.builder().s(id).build(),
-                    VALUE_ATTR to AttributeValue.builder()
-                            .n(instant.toEpochMilli().toString())
-                            .build()))
+            it.item(
+                    mapOf(
+                            ID_ATTR to AttributeValue.builder().s(id).build(),
+                            VALUE_ATTR to AttributeValue.builder().n(instant.toEpochMilli().toString()).build()
+                    )
+            )
         }.await()
     }
 
