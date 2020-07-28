@@ -33,6 +33,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -103,30 +105,22 @@ class KotlinMentionsProcessorTest {
         assertEquals("We have been existing 01d:02h:03m:04s without mentioning", message)
     }
 
-    @Test
-    fun `test with "kotlin" is russian then should send sticker`() {
-        testStickerWasSent("а с котлином прокатывает)")
-    }
+    @ParameterizedTest(name = "{index} test mentioning \"{0}\" then should send")
+    @ValueSource(strings = [
+        "А если к0тлин?", "А если к0тлен?", "А если к0тл1н?", "А если котлен?", "А если котл1н?",
+        "А если ккккотлин?", "А если кооооотлин?", "А если котлиииин?", "А если котл1ннннн?",
 
-    @Test
-    fun `test with "kotlin" in english then should send sticker`() {
-        testStickerWasSent("Jsf c kotlin dsl")
-    }
+        "А если k0tlin?", "А если k0tlеn?", "А если k0tl1n?", "А если kotlen?", "А если kotl1n?",
+        "А если k0ooottttlin?", "А если k0tliiii111n?", "А если koootliiiiin?", "А если kkoottlliinn?",
 
-    @Test
-    fun `test with "kotlin" in english case insensitive then should send sticker`() {
-        testStickerWasSent("Kotlin с иммутабельными датаклассами")
-    }
-
-    @Test
-    fun `test with "kotlin" in english multiline then should send sticker`() {
-        testStickerWasSent("""
+        "А если kкоo0тtлlие1ieнn?", "а с котлином прокатывает)", "Jsf c kotlin dsl", "Kotlin с иммутабельными датаклассами",
+        """
             лююдиии
             мб кто-то помнит твит какого-то чувак, где он говорит что kotlin разработчики были бы намного эффективнее, 
             если бы не тратили кучу времени доказывая всем вокруг что котлин крут
             никак найти не могу...
-        """.trimIndent())
-    }
+        """])
+    fun `test mentioning fuzzy kotlin then should be send`(kotlinTypo: String) = testStickerWasSent(kotlinTypo)
 
     @Test
     fun `test without kotlin mentioning then sticker shouldn't be sent`() = runBlocking {
