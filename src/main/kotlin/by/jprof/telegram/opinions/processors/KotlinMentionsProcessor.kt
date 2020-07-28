@@ -14,6 +14,7 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
 import java.time.Duration
 import java.time.Instant
+import kotlin.random.Random
 
 class KotlinMentionsProcessor(
         private val bot: RequestsExecutor,
@@ -33,7 +34,10 @@ class KotlinMentionsProcessor(
                         duration.toDaysPart(), duration.toHoursPart(),
                         duration.toMinutesPart(), duration.toSecondsPart())
 
-        fun hasPassedEnoughTimeSincePreviousReply(duration: Duration): Boolean = duration > requiredDelayBetweenReplies
+        fun hasPassedEnoughTimeSincePreviousReply(duration: Duration): Boolean =
+                duration.toMillis() > Random.nextLong(
+                        minRequiredDelayBetweenReplies.toMillis(),
+                        maxRequiredDelayBetweenReplies.toMillis())
     }
 
     override suspend fun process(update: Update) {
