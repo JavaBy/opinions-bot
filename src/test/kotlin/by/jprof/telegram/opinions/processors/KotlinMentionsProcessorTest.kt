@@ -102,7 +102,7 @@ class KotlinMentionsProcessorTest {
                         .minus(3, ChronoUnit.MINUTES)
                         .minusSeconds(4),
                         now))
-        assertEquals("We have been existing 01d:02h:03m:04s without mentioning", message)
+        assertEquals("Passed 01d:02h:03m:04s without an incident", message)
     }
 
     @ParameterizedTest(name = "{index} test mentioning \"{0}\" then should send")

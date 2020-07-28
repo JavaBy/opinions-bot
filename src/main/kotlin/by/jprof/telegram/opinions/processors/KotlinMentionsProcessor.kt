@@ -31,7 +31,7 @@ class KotlinMentionsProcessor(
         private val maxRequiredDelayBetweenReplies: Duration = Duration.ofHours(1)!!
 
         fun composeStickerMessage(duration: Duration): String =
-                "We have been existing %02dd:%02dh:%02dm:%02ds without mentioning".format(
+                "Passed %02dd:%02dh:%02dm:%02ds without an incident".format(
                         duration.toDaysPart(), duration.toHoursPart(),
                         duration.toMinutesPart(), duration.toSecondsPart())
 
