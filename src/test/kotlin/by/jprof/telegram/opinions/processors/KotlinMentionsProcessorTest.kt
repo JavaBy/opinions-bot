@@ -104,12 +104,6 @@ class KotlinMentionsProcessorTest {
     }
 
     @Test
-    fun `test send message with previous period without mentioning`() {
-        testStickerWasSent("а с котлином прокатывает)")
-
-    }
-
-    @Test
     fun `test with "kotlin" is russian then should send sticker`() {
         testStickerWasSent("а с котлином прокатывает)")
     }
