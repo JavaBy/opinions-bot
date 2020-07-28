@@ -20,7 +20,7 @@ class KotlinMentionsProcessor(
         private val bot: RequestsExecutor,
         private val kotlinMentionsDAO: KotlinMentionsDAO,
         private val stickerFileId: String = zeroDaysWithoutKotlinStickerFileId,
-        private val hasPassedEnoughTimeSincePreviousReply: (Duration) -> Boolean = ::hasPassedEnoughTimeSincePreviousReply,
+        private val hasPassedEnoughTimeSincePreviousMention: (Duration) -> Boolean = ::hasPassedEnoughTimeSincePreviousMention,
         private val containsMatchIn: (String) -> Boolean = kotlinRegex::containsMatchIn,
         private val composeStickerMessage: (Duration) -> String = ::composeStickerMessage
 ) : UpdateProcessor {
@@ -35,7 +35,7 @@ class KotlinMentionsProcessor(
                         duration.toDaysPart(), duration.toHoursPart(),
                         duration.toMinutesPart(), duration.toSecondsPart())
 
-        fun hasPassedEnoughTimeSincePreviousReply(duration: Duration): Boolean =
+        fun hasPassedEnoughTimeSincePreviousMention(duration: Duration): Boolean =
                 duration.toMillis() > Random.nextLong(
                         minRequiredDelayBetweenReplies.toMillis(),
                         maxRequiredDelayBetweenReplies.toMillis())
@@ -58,7 +58,7 @@ class KotlinMentionsProcessor(
         }
 
         val duration = Duration.between(lastTime, Instant.now())
-        if (!hasPassedEnoughTimeSincePreviousReply(duration)) {
+        if (!hasPassedEnoughTimeSincePreviousMention(duration)) {
             return
         }
 
