@@ -26,19 +26,19 @@ class KotlinMentionsProcessor(
 ) : UpdateProcessor {
     companion object {
         const val zeroDaysWithoutKotlinStickerFileId = "CAACAgIAAxkBAAIBsF8V0dPb6EesBKSujFFOx_URfhSdAAJAAQACqSImBOs5DmSNtKlmGgQ"
-        val kotlinRegex = "([kк]+[оo0]+[тt]+[лl]+[ие1ie]+[нnH]+)".toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE))
+        private val kotlinRegex = "([kк]+[оo0]+[тt]+[лl]+[ие1ie]+[нnH]+)".toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE))
         private val minRequiredDelayBetweenReplies: Duration = Duration.ofMinutes(30)!!
         private val maxRequiredDelayBetweenReplies: Duration = Duration.ofHours(1)!!
+
+        private fun hasPassedEnoughTimeSincePreviousMention(duration: Duration): Boolean =
+                duration.toMillis() > Random.nextLong(
+                        minRequiredDelayBetweenReplies.toMillis(),
+                        maxRequiredDelayBetweenReplies.toMillis())
 
         fun composeStickerMessage(duration: Duration): String =
                 "Passed %02dd:%02dh:%02dm:%02ds without an incident".format(
                         duration.toDaysPart(), duration.toHoursPart(),
                         duration.toMinutesPart(), duration.toSecondsPart())
-
-        fun hasPassedEnoughTimeSincePreviousMention(duration: Duration): Boolean =
-                duration.toMillis() > Random.nextLong(
-                        minRequiredDelayBetweenReplies.toMillis(),
-                        maxRequiredDelayBetweenReplies.toMillis())
     }
 
     override suspend fun process(update: Update) {
