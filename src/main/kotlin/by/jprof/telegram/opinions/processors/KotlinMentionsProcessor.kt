@@ -27,7 +27,8 @@ class KotlinMentionsProcessor(
     companion object {
         const val zeroDaysWithoutKotlinStickerFileId = "CAACAgIAAxkBAAIBsF8V0dPb6EesBKSujFFOx_URfhSdAAJAAQACqSImBOs5DmSNtKlmGgQ"
         val kotlinRegex = "(котлин|kotlin)".toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE))
-        val requiredDelayBetweenReplies: Duration? = Duration.ofHours(1)
+        private val minRequiredDelayBetweenReplies: Duration = Duration.ofMinutes(5)!!
+        private val maxRequiredDelayBetweenReplies: Duration = Duration.ofHours(1)!!
 
         fun composeStickerMessage(duration: Duration): String =
                 "We have been existing %02dd:%02dh:%02dm:%02ds without mentioning".format(
