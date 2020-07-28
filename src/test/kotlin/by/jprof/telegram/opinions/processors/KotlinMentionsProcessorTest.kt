@@ -108,7 +108,7 @@ class KotlinMentionsProcessorTest {
     @ParameterizedTest(name = "{index} test mentioning \"{0}\" then should send")
     @ValueSource(strings = [
         "А если к0тлин?", "А если к0тлен?", "А если к0тл1н?", "А если котлен?", "А если котл1н?",
-        "А если ккккотлин?", "А если кооооотлин?", "А если котлиииин?", "А если котл1ннннн?",
+        "А если ккккотлин?", "А если кооооотлин?", "А если котлиииин?", "А если котл1ннннн?", "А если котл1HHHHH?",
 
         "А если k0tlin?", "А если k0tlеn?", "А если k0tl1n?", "А если kotlen?", "А если kotl1n?",
         "А если k0ooottttlin?", "А если k0tliiii111n?", "А если koootliiiiin?", "А если kkoottlliinn?",
