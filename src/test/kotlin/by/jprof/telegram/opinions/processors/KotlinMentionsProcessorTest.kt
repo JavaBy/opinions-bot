@@ -93,7 +93,7 @@ class KotlinMentionsProcessorTest {
     @Test
     fun `test compose without mention message`() {
         val now = Instant.parse("2020-07-20T23:30:30.0Z")
-        val message = KotlinMentionsProcessor.composeWithoutMentionDurationMessage(
+        val message = KotlinMentionsProcessor.composeStickerMessage(
                 Duration.between(now
                         .minus(1, ChronoUnit.DAYS)
                         .minus(2, ChronoUnit.HOURS)
