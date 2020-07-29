@@ -14,20 +14,31 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
 import java.time.Duration
 import java.time.Instant
+import kotlin.random.Random
 
 class KotlinMentionsProcessor(
         private val bot: RequestsExecutor,
-        private val kotlinMentionsDAO: KotlinMentionsDAO
+        private val kotlinMentionsDAO: KotlinMentionsDAO,
+        private val stickerFileId: String = zeroDaysWithoutKotlinStickerFileId,
+        private val hasPassedEnoughTimeSincePreviousMention: (Duration) -> Boolean = ::hasPassedEnoughTimeSincePreviousMention,
+        private val containsMatchIn: (String) -> Boolean = kotlinRegex::containsMatchIn,
+        private val composeStickerMessage: (Duration) -> String = ::composeStickerMessage
 ) : UpdateProcessor {
     companion object {
         const val zeroDaysWithoutKotlinStickerFileId = "CAACAgIAAxkBAAIBsF8V0dPb6EesBKSujFFOx_URfhSdAAJAAQACqSImBOs5DmSNtKlmGgQ"
-        val kotlinRegex = "(котлин|kotlin)".toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE))
-        val requiredDelayBetweenReplies: Duration? = Duration.ofHours(1)
+        private val kotlinRegex = "([kк]+[оo0]+[тt]+[лl]+[ие1ie]+[нnH]+)".toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE))
+        private val minRequiredDelayBetweenReplies: Duration = Duration.ofMinutes(30)!!
+        private val maxRequiredDelayBetweenReplies: Duration = Duration.ofHours(1)!!
 
-        fun composeWithoutMentionDurationMessage(duration: Duration): String {
-            return "We have been existing %02dd:%02dh:%02dm:%02ds without mentioning"
-                    .format(duration.toDaysPart(), duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart())
-        }
+        private fun hasPassedEnoughTimeSincePreviousMention(duration: Duration): Boolean =
+                duration.toMillis() > Random.nextLong(
+                        minRequiredDelayBetweenReplies.toMillis(),
+                        maxRequiredDelayBetweenReplies.toMillis())
+
+        fun composeStickerMessage(duration: Duration): String =
+                "Passed %02dd:%02dh:%02dm:%02ds without an incident".format(
+                        duration.toDaysPart(), duration.toHoursPart(),
+                        duration.toMinutesPart(), duration.toSecondsPart())
     }
 
     override suspend fun process(update: Update) {
@@ -35,7 +46,7 @@ class KotlinMentionsProcessor(
         val contentMessage = (message.data as? ContentMessage<*>) ?: return
         val textContent = (contentMessage.content as? TextContent) ?: return
 
-        if (!kotlinRegex.containsMatchIn(textContent.text)) return
+        if (!containsMatchIn(textContent.text)) return
 
         val id = contentMessage.chat.id.chatId.toString()
 
@@ -47,13 +58,13 @@ class KotlinMentionsProcessor(
         }
 
         val duration = Duration.between(lastTime, Instant.now())
-        if (duration < requiredDelayBetweenReplies) {
+        if (!hasPassedEnoughTimeSincePreviousMention(duration)) {
             return
         }
 
         val stickerMsg = sendSticker(contentMessage.chat.id, contentMessage.messageId)
         bot.sendTextMessage(contentMessage.chat.id,
-                composeWithoutMentionDurationMessage(duration),
+                composeStickerMessage(duration),
                 replyToMessageId = stickerMsg.messageId)
 
         kotlinMentionsDAO.updateKotlinLastMentionAt(id, Instant.now())
@@ -64,7 +75,7 @@ class KotlinMentionsProcessor(
             messageId: MessageIdentifier
     ): ContentMessage<StickerContent> = bot.sendSticker(
             chatId,
-            zeroDaysWithoutKotlinStickerFileId.toInputFile(),
+            stickerFileId.toInputFile(),
             replyToMessageId = messageId
     )
 }
