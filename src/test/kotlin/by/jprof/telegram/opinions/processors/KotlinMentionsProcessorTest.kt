@@ -128,6 +128,7 @@ class KotlinMentionsProcessorTest {
         "А если kkoottlliinn?",
         "А если kкоo0тtлlие1ieнn?",
         "А если K.o.t.l.i.n?",
+        "А если катлен?",
         "а с котлином прокатывает)",
         "Jsf c kotlin dsl",
         "Kotlin с иммутабельными датаклассами",
@@ -136,7 +137,8 @@ class KotlinMentionsProcessorTest {
             мб кто-то помнит твит какого-то чувак, где он говорит что kotlin разработчики были бы намного эффективнее, 
             если бы не тратили кучу времени доказывая всем вокруг что котлин крут
             никак найти не могу...
-        """])
+        """]
+    )
     fun `test mentioning fuzzy kotlin then should be send`(kotlinTypo: String) = testStickerWasSent(kotlinTypo)
 
     @Test
