@@ -55,7 +55,6 @@ class KotlinMentionsProcessor(
         val lastTime = kotlinMentionsDAO.getKotlinLastMentionAt(chatId.toString())
         if (lastTime == null) {
             sendSticker(chatId, contentMessage.messageId)
-            kotlinMentionsDAO.updateKotlinLastMentionAt(chatId.toString(), Instant.now())
             return
         }
 
@@ -64,20 +63,27 @@ class KotlinMentionsProcessor(
             return
         }
 
-        val stickerMsg = sendSticker(chatId, contentMessage.messageId)
-        bot.sendTextMessage(chatId.toChatId(),
-                composeStickerMessage(duration),
-                replyToMessageId = stickerMsg.messageId)
-
-        kotlinMentionsDAO.updateKotlinLastMentionAt(chatId.toString(), Instant.now())
+        sendSticker(chatId, contentMessage.messageId) {
+            bot.sendTextMessage(chatId.toChatId(),
+                    composeStickerMessage(duration),
+                    replyToMessageId = it.messageId)
+        }
     }
 
     private suspend fun sendSticker(
             chatId: Identifier,
-            messageId: MessageIdentifier
-    ): ContentMessage<StickerContent> = bot.sendSticker(
-            chatId.toChatId(),
-            stickerFileId.toInputFile(),
-            replyToMessageId = messageId
-    )
+            messageId: MessageIdentifier,
+            onSend: suspend (ContentMessage<StickerContent>) -> Unit = {}
+    ) {
+        val response = bot.sendSticker(
+                chatId.toChatId(),
+                stickerFileId.toInputFile(),
+                replyToMessageId = messageId
+        )
+
+        onSend(response)
+
+        kotlinMentionsDAO.updateKotlinLastMentionAt(
+                chatId.toString(), Instant.now())
+    }
 }
