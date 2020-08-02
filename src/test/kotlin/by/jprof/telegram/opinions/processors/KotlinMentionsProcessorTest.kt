@@ -8,9 +8,12 @@ import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.Request
 import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.toInputFile
 import com.github.insanusmokrassar.TelegramBotAPI.types.ChatId
 import com.github.insanusmokrassar.TelegramBotAPI.types.ChatIdentifier
+import com.github.insanusmokrassar.TelegramBotAPI.types.CommonUser
+import com.github.insanusmokrassar.TelegramBotAPI.types.TelegramDate
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageIdentifier
 import com.github.insanusmokrassar.TelegramBotAPI.types.chat.GroupChatImpl
-import com.github.insanusmokrassar.TelegramBotAPI.types.chat.abstracts.Chat
+import com.github.insanusmokrassar.TelegramBotAPI.types.message.AnonymousForwardInfo
+import com.github.insanusmokrassar.TelegramBotAPI.types.message.CommonMessageImpl
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.abstracts.ContentMessage
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.TextContent
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.media.StickerContent
@@ -47,6 +50,7 @@ class KotlinMentionsProcessorTest {
     @RelaxedMockK
     private lateinit var kotlinMentionsDAOMock: KotlinMentionsDAO
     private val expectedChatId = ChatId(1L)
+    private val expectedUserId = CommonUser(ChatId(1L), "soprano")
     private val expectedStickerMessageId: MessageIdentifier = 1L
     private val expectedPeriodReplyMessageId: MessageIdentifier = 2L
     private val expectedStickerFileId = KotlinMentionsProcessor.zeroDaysWithoutKotlinStickerFileId.toInputFile()
@@ -174,15 +178,14 @@ class KotlinMentionsProcessorTest {
     }
 
     private fun mockMessage(text: String): ContentMessage<TextContent> {
-        return object : ContentMessage<TextContent> {
-            override val chat: Chat
-                get() = GroupChatImpl(expectedChatId, "jprofby")
-            override val content: TextContent
-                get() = TextContent(text)
-            override val date: DateTime
-                get() = DateTime.now()
-            override val messageId: MessageIdentifier
-                get() = expectedStickerMessageId
-        }
+        return CommonMessageImpl(
+                expectedStickerMessageId,
+                expectedUserId,
+                GroupChatImpl(expectedChatId, "jprofby"),
+                TextContent(text),
+                DateTime.now(),
+                DateTime.now(),
+                AnonymousForwardInfo(TelegramDate(DateTime.now()), "unknown"),
+                null, null, null, null)
     }
 }
