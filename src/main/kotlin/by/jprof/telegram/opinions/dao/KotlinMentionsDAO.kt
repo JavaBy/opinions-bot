@@ -14,7 +14,7 @@ class KotlinMentionsDAO(
         private const val VALUE_ATTR = "timestamp"
     }
 
-    suspend fun updateKotlinLastMentionAt(id: String, instant: Instant) {
+    suspend fun updateKotlinLastMentionAt(id: String, userId: String, instant: Instant) {
         dynamoDb.putItem {
             it.tableName(table)
             it.item(

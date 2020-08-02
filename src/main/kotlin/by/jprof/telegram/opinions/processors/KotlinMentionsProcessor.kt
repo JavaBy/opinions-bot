@@ -51,10 +51,11 @@ class KotlinMentionsProcessor(
         if (!containsMatchIn(textContent.text)) return
 
         val chatId = contentMessage.chat.id.chatId
+        val userId = contentMessage.user.id.chatId
 
         val lastTime = kotlinMentionsDAO.getKotlinLastMentionAt(chatId.toString())
         if (lastTime == null) {
-            sendSticker(chatId, contentMessage.messageId)
+            sendSticker(chatId, userId, contentMessage.messageId)
             return
         }
 
@@ -63,7 +64,7 @@ class KotlinMentionsProcessor(
             return
         }
 
-        sendSticker(chatId, contentMessage.messageId) {
+        sendSticker(chatId, userId, contentMessage.messageId) {
             bot.sendTextMessage(chatId.toChatId(),
                     composeStickerMessage(duration),
                     replyToMessageId = it.messageId)
@@ -72,6 +73,7 @@ class KotlinMentionsProcessor(
 
     private suspend fun sendSticker(
             chatId: Identifier,
+            userId: Identifier,
             messageId: MessageIdentifier,
             onSend: suspend (ContentMessage<StickerContent>) -> Unit = {}
     ) {
@@ -84,6 +86,6 @@ class KotlinMentionsProcessor(
         onSend(response)
 
         kotlinMentionsDAO.updateKotlinLastMentionAt(
-                chatId.toString(), Instant.now())
+                chatId.toString(), userId.toString(), Instant.now())
     }
 }
