@@ -7,6 +7,7 @@ import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.sendTextMe
 import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.toInputFile
 import com.github.insanusmokrassar.TelegramBotAPI.types.ChatId
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageIdentifier
+import com.github.insanusmokrassar.TelegramBotAPI.types.message.CommonMessageImpl
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.abstracts.ContentMessage
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.TextContent
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.media.StickerContent
@@ -43,7 +44,7 @@ class KotlinMentionsProcessor(
 
     override suspend fun process(update: Update) {
         val message = (update as? MessageUpdate) ?: return
-        val contentMessage = (message.data as? ContentMessage<*>) ?: return
+        val contentMessage = (message.data as? CommonMessageImpl<*>) ?: return
         val textContent = (contentMessage.content as? TextContent) ?: return
 
         if (!containsMatchIn(textContent.text)) return
