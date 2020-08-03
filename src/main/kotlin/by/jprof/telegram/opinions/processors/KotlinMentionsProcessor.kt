@@ -14,20 +14,18 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
 import java.time.Duration
 import java.time.Instant
+import kotlin.random.Random
 
 class KotlinMentionsProcessor(
-        private val bot: RequestsExecutor,
-        private val kotlinMentionsDAO: KotlinMentionsDAO
+    private val bot: RequestsExecutor,
+    private val kotlinMentionsDAO: KotlinMentionsDAO,
+    private val stickerFileId: String = zeroDaysWithoutKotlinStickerFileId
 ) : UpdateProcessor {
     companion object {
         const val zeroDaysWithoutKotlinStickerFileId = "CAACAgIAAxkBAAIBsF8V0dPb6EesBKSujFFOx_URfhSdAAJAAQACqSImBOs5DmSNtKlmGgQ"
-        val kotlinRegex = "(котлин|kotlin)".toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE))
-        val requiredDelayBetweenReplies: Duration? = Duration.ofHours(1)
-
-        fun composeWithoutMentionDurationMessage(duration: Duration): String {
-            return "We have been existing %02dd:%02dh:%02dm:%02ds without mentioning"
-                    .format(duration.toDaysPart(), duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart())
-        }
+        private val kotlinRegex = "([kк]+.{0,5}[оo0aа]+.{0,5}[тt]+.{0,5}[лl]+.{0,5}[ие1ie]+.{0,5}[нnH]+)".toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE))
+        private val minRequiredDelayBetweenReplies: Duration = Duration.ofMinutes(30)
+        private val maxRequiredDelayBetweenReplies: Duration = Duration.ofHours(1)
     }
 
     override suspend fun process(update: Update): Unit = update.let {
@@ -47,40 +45,50 @@ class KotlinMentionsProcessor(
 
         Pair(contentMessage, id)
     }.let { (contentMessage, id) ->
-        val lastTime = kotlinMentionsDAO.getKotlinLastMentionAt(id)
-        if (lastTime == null) {
-            sendSticker(contentMessage.chat.id, contentMessage.messageId)
-            kotlinMentionsDAO.updateKotlinLastMentionAt(id, Instant.now())
-            return
+        when (val lastTime = kotlinMentionsDAO.getKotlinLastMentionAt(id)) {
+            null -> {
+                sendSticker(contentMessage.chat.id, contentMessage.messageId)
+                kotlinMentionsDAO.updateKotlinLastMentionAt(id, Instant.now())
+                return
+            }
+            else -> Triple(contentMessage, id, lastTime)
         }
-
-        Triple(contentMessage, id, lastTime)
     }.let { (contentMessage, id, lastTime) ->
         val duration = Duration.between(lastTime, Instant.now())
-        if (duration < requiredDelayBetweenReplies) {
-            return
+        when (hasPassedEnoughTimeSincePreviousMention(duration)) {
+            false -> return
+            true -> Triple(contentMessage, id, duration)
         }
-
-        Triple(contentMessage, id, duration)
     }.let { (contentMessage, id, duration) ->
         val stickerMsg = sendSticker(contentMessage.chat.id, contentMessage.messageId)
-        bot.sendTextMessage(contentMessage.chat.id,
-            composeWithoutMentionDurationMessage(duration),
-            replyToMessageId = stickerMsg.messageId)
+        bot.sendTextMessage(contentMessage.chat.id, duration.toComposeStickerMessage(), replyToMessageId = stickerMsg.messageId)
 
         kotlinMentionsDAO.updateKotlinLastMentionAt(id, Instant.now())
     }
 
     private suspend fun sendSticker(
-            chatId: ChatId,
-            messageId: MessageIdentifier
+        chatId: ChatId,
+        messageId: MessageIdentifier
     ): ContentMessage<StickerContent> = bot.sendSticker(
-            chatId,
-            zeroDaysWithoutKotlinStickerFileId.toInputFile(),
-            replyToMessageId = messageId
+        chatId,
+        stickerFileId.toInputFile(),
+        replyToMessageId = messageId
     )
+
+    private fun String.isNotKotlin(): Boolean {
+        return !kotlinRegex.containsMatchIn(this)
+    }
+
+    private fun hasPassedEnoughTimeSincePreviousMention(duration: Duration): Boolean =
+        duration.toMillis() > Random.nextLong(
+            minRequiredDelayBetweenReplies.toMillis(),
+            maxRequiredDelayBetweenReplies.toMillis())
+
 }
 
-private fun String.isNotKotlin(): Boolean {
-    return !KotlinMentionsProcessor.kotlinRegex.containsMatchIn(this)
-}
+fun Duration.toComposeStickerMessage(): String =
+    "Passed %02dd:%02dh:%02dm:%02ds without an incident".format(
+        this.toDaysPart(), this.toHoursPart(),
+        this.toMinutesPart(), this.toSecondsPart())
+
+
