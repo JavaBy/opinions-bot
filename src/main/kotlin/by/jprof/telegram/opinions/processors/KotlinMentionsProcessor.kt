@@ -83,6 +83,6 @@ class KotlinMentionsProcessor(
         onSend(response)
 
         kotlinMentionsDAO.updateKotlinMentionInfo(
-                chatId.toString(), userId.toString(), Instant.now())
+                chatId.toString(), userId.toString())
     }
 }

@@ -17,7 +17,7 @@ class KotlinMentionsDAO(
     @Volatile
     private var initialized = false
 
-    suspend fun updateKotlinMentionInfo(id: String, userId: String, instant: Instant) {
+    suspend fun updateKotlinMentionInfo(id: String, userId: String) {
         val builder = UpdateItemRequest.builder()
                 .tableName(table)
                 .key(mapOf(ID_ATTR to AttributeValue.builder().s(id).build()))
