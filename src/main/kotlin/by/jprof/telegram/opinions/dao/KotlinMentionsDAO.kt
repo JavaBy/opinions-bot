@@ -34,10 +34,7 @@ class KotlinMentionsDAO(
 
         dynamoDb.updateItem(builder.applyMutation {
             it.updateExpression("SET #u.#user_id = if_not_exists(#u.#user_id, :empty)")
-            it.expressionAttributeNames(mapOf(
-                    "#u" to "users",
-                    "#user_id" to userId)
-            )
+            it.expressionAttributeNames(mapOf("#u" to "users", "#user_id" to userId))
             it.expressionAttributeValues(mapOf(":empty" to AttributeValue.builder().m(mapOf(
                     "count" to AttributeValue.builder().n("0").build(),
                     "last_time" to AttributeValue.builder().n("0").build()
@@ -54,12 +51,10 @@ class KotlinMentionsDAO(
                     "#t" to "timestamp",
                     "#c" to "count",
                     "#u" to "users",
-                    "#user_id" to userId)
-            )
+                    "#user_id" to userId))
             it.expressionAttributeValues(mapOf(
                     ":last_time" to AttributeValue.builder().n(Instant.now().toEpochMilli().toString()).build(),
-                    ":inc" to AttributeValue.builder().n("1").build()
-            ))
+                    ":inc" to AttributeValue.builder().n("1").build()))
         }.build())
     }
 
