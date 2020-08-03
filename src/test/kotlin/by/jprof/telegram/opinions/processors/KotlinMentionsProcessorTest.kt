@@ -53,7 +53,7 @@ class KotlinMentionsProcessorTest {
     private val expectedUserId = CommonUser(ChatId(1L), "soprano")
     private val expectedStickerMessageId: MessageIdentifier = 1L
     private val expectedPeriodReplyMessageId: MessageIdentifier = 2L
-    private val expectedStickerFileId = KotlinMentionsProcessor.zeroDaysWithoutKotlinStickerFileId.toInputFile()
+    private val expectedStickerFileId = "CAACA".toInputFile()
 
     @BeforeEach
     fun setUp() {
@@ -152,7 +152,9 @@ class KotlinMentionsProcessorTest {
     }
 
     private suspend fun processUpdate(message: String) {
-        val processor = KotlinMentionsProcessor(reqExecutorMock, kotlinMentionsDAOMock)
+        val processor = KotlinMentionsProcessor(
+                reqExecutorMock, kotlinMentionsDAOMock,
+                stickerFileId = expectedStickerFileId.fileId)
         processor.process(MessageUpdate(1L, mockMessage(message)))
     }
 
