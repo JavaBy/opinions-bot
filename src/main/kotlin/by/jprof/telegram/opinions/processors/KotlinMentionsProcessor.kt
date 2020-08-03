@@ -30,15 +30,23 @@ class KotlinMentionsProcessor(
         }
     }
 
-    override suspend fun process(update: Update) {
-        val message = (update as? MessageUpdate) ?: return
-        val contentMessage = (message.data as? ContentMessage<*>) ?: return
-        val textContent = (contentMessage.content as? TextContent) ?: return
+    override suspend fun process(update: Update): Unit = update.let {
+        when (it) {
+            is MessageUpdate -> it
+            else -> return
+        }
+    }.let {
+        val contentMessage = (it.data as? ContentMessage<*>) ?: return
+        val text = (contentMessage.content as? TextContent)?.text ?: return
 
-        if (!kotlinRegex.containsMatchIn(textContent.text)) return
-
+        Pair(contentMessage, text)
+    }.also { (_, text) ->
+        if (text.isNotKotlin()) return
+    }.let { (contentMessage, _) ->
         val id = contentMessage.chat.id.chatId.toString()
 
+        Pair(contentMessage, id)
+    }.let { (contentMessage, id) ->
         val lastTime = kotlinMentionsDAO.getKotlinLastMentionAt(id)
         if (lastTime == null) {
             sendSticker(contentMessage.chat.id, contentMessage.messageId)
@@ -46,15 +54,19 @@ class KotlinMentionsProcessor(
             return
         }
 
+        Triple(contentMessage, id, lastTime)
+    }.let { (contentMessage, id, lastTime) ->
         val duration = Duration.between(lastTime, Instant.now())
         if (duration < requiredDelayBetweenReplies) {
             return
         }
 
+        Triple(contentMessage, id, duration)
+    }.let { (contentMessage, id, duration) ->
         val stickerMsg = sendSticker(contentMessage.chat.id, contentMessage.messageId)
         bot.sendTextMessage(contentMessage.chat.id,
-                composeWithoutMentionDurationMessage(duration),
-                replyToMessageId = stickerMsg.messageId)
+            composeWithoutMentionDurationMessage(duration),
+            replyToMessageId = stickerMsg.messageId)
 
         kotlinMentionsDAO.updateKotlinLastMentionAt(id, Instant.now())
     }
@@ -67,4 +79,8 @@ class KotlinMentionsProcessor(
             zeroDaysWithoutKotlinStickerFileId.toInputFile(),
             replyToMessageId = messageId
     )
+}
+
+private fun String.isNotKotlin(): Boolean {
+    return !KotlinMentionsProcessor.kotlinRegex.containsMatchIn(this)
 }
