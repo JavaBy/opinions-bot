@@ -47,17 +47,12 @@ class KotlinMentionsProcessor(
         val message = (update as? MessageUpdate) ?: return
         val contentMessage = (message.data as? CommonMessageImpl<*>) ?: return
         val textContent = (contentMessage.content as? TextContent) ?: return
-
         if (!containsMatchIn(textContent.text)) return
-
         val chatId = contentMessage.chat.id.chatId
         val userId = contentMessage.user.id.chatId
-
         val lastTime = kotlinMentionsDAO.getKotlinLastMentionAt(chatId.toString())
                 ?: return sendSticker(chatId, userId, contentMessage.messageId)
-
         val duration = computeDurationIfPassedEnoughTime(lastTime) ?: return
-
         sendSticker(chatId, userId, contentMessage.messageId) {
             bot.sendTextMessage(chatId.toChatId(),
                     composeStickerMessage(duration),
