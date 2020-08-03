@@ -56,16 +56,21 @@ class KotlinMentionsProcessor(
         val lastTime = kotlinMentionsDAO.getKotlinLastMentionAt(chatId.toString())
                 ?: return sendSticker(chatId, userId, contentMessage.messageId)
 
-        val duration = Duration.between(lastTime, Instant.now())
-        if (!hasPassedEnoughTimeSincePreviousMention(duration)) {
-            return
-        }
+        val duration = computeDurationIfPassedEnoughTime(lastTime) ?: return
 
         sendSticker(chatId, userId, contentMessage.messageId) {
             bot.sendTextMessage(chatId.toChatId(),
                     composeStickerMessage(duration),
                     replyToMessageId = it.messageId)
         }
+    }
+
+    private fun computeDurationIfPassedEnoughTime(lastTime: Instant): Duration? {
+        val duration = Duration.between(lastTime, Instant.now())
+        if (hasPassedEnoughTimeSincePreviousMention(duration)) {
+            return duration
+        }
+        return null
     }
 
     private suspend fun sendSticker(
