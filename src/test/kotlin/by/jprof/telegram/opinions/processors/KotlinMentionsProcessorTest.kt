@@ -128,6 +128,7 @@ class KotlinMentionsProcessorTest {
         "А если kкоo0тtлlие1ieнn?",
         "А если K.o.t.l.i.n?",
         "А если катлен?",
+        "А если котлен?",
         "а с котлином прокатывает)",
         "Jsf c kotlin dsl",
         "Kotlin с иммутабельными датаклассами",
