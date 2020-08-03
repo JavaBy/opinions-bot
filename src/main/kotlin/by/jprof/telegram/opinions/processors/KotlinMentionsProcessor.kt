@@ -26,7 +26,7 @@ class KotlinMentionsProcessor(
 ) : UpdateProcessor {
     companion object {
         const val zeroDaysWithoutKotlinStickerFileId = "CAACAgIAAxkBAAIBsF8V0dPb6EesBKSujFFOx_URfhSdAAJAAQACqSImBOs5DmSNtKlmGgQ"
-        private val kotlinRegex = "([kк]+.{0,5}[оo0aа]+.{0,5}[тt]+.{0,5}[лl]+.{0,5}[ие1ie]+.{0,5}[нnH]+)".toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE))
+        private val kotlinRegex = "([kк]+.{0,3}[оo0aа]+.{0,3}[тt]+.{0,3}[лl]+.{0,3}[ие1ie]+.{0,3}[нnH]+)".toRegex(setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE))
         private val minRequiredDelayBetweenReplies: Duration = Duration.ofMinutes(30)!!
         private val maxRequiredDelayBetweenReplies: Duration = Duration.ofHours(1)!!
 
