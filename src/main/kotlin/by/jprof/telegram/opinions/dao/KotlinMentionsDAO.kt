@@ -14,23 +14,16 @@ class KotlinMentionsDAO(
         private const val ID_ATTR = "chatId"
     }
 
-    @Volatile
-    private var initialized = false
-
     suspend fun updateKotlinMentionInfo(id: String, userId: String) {
         val builder = UpdateItemRequest.builder()
                 .tableName(table)
                 .key(mapOf(ID_ATTR to AttributeValue.builder().s(id).build()))
 
-        if (!initialized) {
-            // small optimization: create "users" map attr only once, because it's top level attribute
-            dynamoDb.updateItem(builder.applyMutation {
-                it.updateExpression("SET #u = if_not_exists(#u, :empty)")
-                it.expressionAttributeNames(mapOf("#u" to "users"))
-                it.expressionAttributeValues(mapOf(":empty" to AttributeValue.builder().m(mapOf()).build()))
-            }.build()).await()
-            initialized = true
-        }
+        dynamoDb.updateItem(builder.applyMutation {
+            it.updateExpression("SET #u = if_not_exists(#u, :empty)")
+            it.expressionAttributeNames(mapOf("#u" to "users"))
+            it.expressionAttributeValues(mapOf(":empty" to AttributeValue.builder().m(mapOf()).build()))
+        }.build()).await()
 
         dynamoDb.updateItem(builder.applyMutation {
             it.updateExpression("SET #u.#user_id = if_not_exists(#u.#user_id, :empty)")
