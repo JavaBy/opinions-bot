@@ -20,11 +20,14 @@ data class KotlinMention(
         fun fromAttrs(data: Map<String, AttributeValue>): KotlinMention = KotlinMention(
                 data.require(CHAT_ID_ATTR).s().toLong(),
                 Instant.ofEpochMilli(data.require(TIMESTAMP_ATTR).n().toLong()),
-                (data[USERS_ATTR]?.m() ?: emptyMap<String, AttributeValue>()).mapValues { (_, value) ->
-                    val countAttr = value.m().require(COUNT_ATTR)
-                    val lastUpdateAtAttr = value.m().require(LAST_UPDATED_AT_ATTR)
-                    MentionStats(countAttr.n().toLong(), Instant.ofEpochMilli(lastUpdateAtAttr.n().toLong()))
-                }.mapKeys { (key, _) -> key.toLong() }
+                (data[USERS_ATTR]?.m() ?: emptyMap<String, AttributeValue>())
+                        .mapKeys { (key, _) -> key.toLong() }
+                        .mapValues { (_, value) ->
+                            MentionStats(
+                                    value.m().require(COUNT_ATTR).n().toLong(),
+                                    Instant.ofEpochMilli(
+                                            value.m().require(LAST_UPDATED_AT_ATTR).n().toLong()))
+                        }
         )
     }
 
