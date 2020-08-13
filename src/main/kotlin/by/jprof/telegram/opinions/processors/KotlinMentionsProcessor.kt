@@ -53,7 +53,7 @@ class KotlinMentionsProcessor(
         val userId = contentMessage.user.id.chatId
         val mentions = kotlinMentionsDAO.find(chatId.toString())
                 ?: return sendSticker(
-                        KotlinMention(chatId, Instant.now(), mutableMapOf()),
+                        KotlinMention(chatId, Instant.now()),
                         contentMessage.messageId)
         val duration = computeDurationIfPassedEnoughTime(mentions.timestamp) ?: return
         val updatedMention = mentions.updateUserStats(userId)
