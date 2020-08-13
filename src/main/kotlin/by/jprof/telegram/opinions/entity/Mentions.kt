@@ -14,7 +14,7 @@ const val LAST_UPDATED_AT_ATTR = "lastUpdatedAt"
 data class KotlinMention(
         val chatId: Long,
         val timestamp: Instant,
-        private val users: Map<Long, MentionStats>
+        val users: Map<Long, MentionStats>
 ) {
     companion object {
         fun fromAttrs(data: Map<String, AttributeValue>): KotlinMention = KotlinMention(
