@@ -196,5 +196,5 @@ class KotlinMentionsProcessorTest {
     private fun kotlinMention(
             timestamp: Instant,
             chatId: ChatId = expectedChatId
-    ) = KotlinMention(chatId.chatId, timestamp, mutableMapOf())
+    ) = KotlinMention(chatId.chatId, timestamp)
 }
