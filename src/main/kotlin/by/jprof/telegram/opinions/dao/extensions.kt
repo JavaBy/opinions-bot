@@ -9,5 +9,5 @@ fun <T : Number> T.toAttributeValue(): AttributeValue = AttributeValue.builder()
 fun Map<String, AttributeValue>.toAttributeValue() = AttributeValue.builder().m(this).build()
 
 fun Map<String, AttributeValue>.require(attr: String, message: String? = null): AttributeValue {
-    return this[attr] ?: throw IllegalStateException(message ?: "Missing '$attr' attribute in $this!")
+    return this[attr] ?: throw IllegalStateException(message ?: "Missing '$attr' attribute!")
 }
