@@ -57,4 +57,22 @@ internal class KotlinMentionTest {
         }
         assertEquals(lastUpdatedAtError.localizedMessage, "Missing '$LAST_UPDATED_AT_ATTR' attribute!")
     }
+
+    @Test
+    fun `test mapping kotlin stats to attributes`() {
+        val now = Instant.now()
+        assertEquals(
+                KotlinMention(1, now, mapOf(1L to MentionStats(1, now))).toAttrs(),
+                mapOf<String, AttributeValue>(
+                        CHAT_ID_ATTR to "1".toAttributeValue(),
+                        TIMESTAMP_ATTR to now.toEpochMilli().toAttributeValue(),
+                        USERS_ATTR to mapOf(
+                                "1" to mapOf(
+                                        COUNT_ATTR to 1.toAttributeValue(),
+                                        LAST_UPDATED_AT_ATTR to now.toEpochMilli().toAttributeValue()
+                                ).toAttributeValue()
+                        ).toAttributeValue()
+                )
+        )
+    }
 }
