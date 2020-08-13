@@ -14,7 +14,7 @@ const val LAST_UPDATED_AT_ATTR = "lastUpdatedAt"
 data class KotlinMention(
         val chatId: Long,
         val timestamp: Instant,
-        private val users: MutableMap<Long, MentionStats>
+        private val users: Map<Long, MentionStats>
 ) {
     companion object {
         fun fromAttrs(data: Map<String, AttributeValue>): KotlinMention = KotlinMention(
@@ -24,7 +24,7 @@ data class KotlinMention(
                     val countAttr = value.m().require(COUNT_ATTR)
                     val lastUpdateAtAttr = value.m().require(LAST_UPDATED_AT_ATTR)
                     MentionStats(countAttr.n().toLong(), Instant.ofEpochMilli(lastUpdateAtAttr.n().toLong()))
-                }.mapKeys { (key, _) -> key.toLong() }.toMutableMap()
+                }.mapKeys { (key, _) -> key.toLong() }
         )
     }
 
