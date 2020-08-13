@@ -1,6 +1,7 @@
 package by.jprof.telegram.opinions.processors
 
 import by.jprof.telegram.opinions.dao.KotlinMentionsDAO
+import by.jprof.telegram.opinions.entity.KotlinMention
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.media.sendSticker
 import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.InputFile
@@ -60,7 +61,7 @@ class KotlinMentionsProcessorTest {
         val contentMessage = mockk<ContentMessage<StickerContent>>(relaxed = true) {
             every { messageId } returns expectedPeriodReplyMessageId
         }
-        coEvery { kotlinMentionsDAOMock.getKotlinLastMentionAt(any()) } returns null
+        coEvery { kotlinMentionsDAOMock.find(any()) } returns null
         mockkStatic("com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.media.SendStickerKt")
         coEvery { reqExecutorMock.sendSticker(any(), any(), replyToMessageId = any()) } returns contentMessage
     }
@@ -74,7 +75,7 @@ class KotlinMentionsProcessorTest {
     @Test
     fun `test second reply shouldn't be send if less than X hours spent since first reply`() = runBlocking {
         testStickerWasSent("I don't like kotlin")
-        coEvery { kotlinMentionsDAOMock.getKotlinLastMentionAt(any()) } returns Instant.now()
+        coEvery { kotlinMentionsDAOMock.find(any()) } returns kotlinMention(Instant.now())
         processUpdate("I don't like kotlin")
         // check by number of invocations that reply wasn't sent
         assertSticker()
@@ -87,8 +88,8 @@ class KotlinMentionsProcessorTest {
 
         // emulate some delay by shifting 'last-mention' value back
         coEvery {
-            kotlinMentionsDAOMock.getKotlinLastMentionAt(any())
-        } returns Instant.now().minus(2, ChronoUnit.HOURS)
+            kotlinMentionsDAOMock.find(any())
+        } returns kotlinMention(Instant.now().minus(2, ChronoUnit.HOURS))
 
         processUpdate("I don't like kotlin")
         assertSticker(exactly = 2)
@@ -191,4 +192,9 @@ class KotlinMentionsProcessorTest {
                 AnonymousForwardInfo(TelegramDate(DateTime.now()), "unknown"),
                 null, null, null, null)
     }
+
+    private fun kotlinMention(
+            timestamp: Instant,
+            chatId: ChatId = expectedChatId
+    ) = KotlinMention(chatId.chatId, timestamp, mutableMapOf())
 }

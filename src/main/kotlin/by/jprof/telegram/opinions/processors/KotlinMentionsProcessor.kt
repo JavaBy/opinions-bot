@@ -1,11 +1,12 @@
 package by.jprof.telegram.opinions.processors
 
 import by.jprof.telegram.opinions.dao.KotlinMentionsDAO
+import by.jprof.telegram.opinions.entity.KotlinMention
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.media.sendSticker
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.sendTextMessage
 import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.toInputFile
-import com.github.insanusmokrassar.TelegramBotAPI.types.Identifier
+import com.github.insanusmokrassar.TelegramBotAPI.types.ChatId
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageIdentifier
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.CommonMessageImpl
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.abstracts.ContentMessage
@@ -50,10 +51,13 @@ class KotlinMentionsProcessor(
         if (!containsMatchIn(textContent.text)) return
         val chatId = contentMessage.chat.id.chatId
         val userId = contentMessage.user.id.chatId
-        val lastTime = kotlinMentionsDAO.getKotlinLastMentionAt(chatId.toString())
-                ?: return sendSticker(chatId, userId, contentMessage.messageId)
-        val duration = computeDurationIfPassedEnoughTime(lastTime) ?: return
-        sendSticker(chatId, userId, contentMessage.messageId) {
+        val mentions = kotlinMentionsDAO.find(chatId.toString())
+                ?: return sendSticker(
+                        KotlinMention(chatId, Instant.now(), mutableMapOf()),
+                        contentMessage.messageId)
+        val duration = computeDurationIfPassedEnoughTime(mentions.timestamp) ?: return
+        val updatedMention = mentions.updateUserStats(userId)
+        sendSticker(updatedMention, contentMessage.messageId) {
             bot.sendTextMessage(chatId.toChatId(),
                     composeStickerMessage(duration),
                     replyToMessageId = it.messageId)
@@ -69,20 +73,18 @@ class KotlinMentionsProcessor(
     }
 
     private suspend fun sendSticker(
-            chatId: Identifier,
-            userId: Identifier,
+            mentions: KotlinMention,
             messageId: MessageIdentifier,
             onSend: suspend (ContentMessage<StickerContent>) -> Unit = {}
     ) {
         val response = bot.sendSticker(
-                chatId.toChatId(),
+                ChatId(mentions.chatId),
                 stickerFileId.toInputFile(),
                 replyToMessageId = messageId
         )
 
         onSend(response)
 
-        kotlinMentionsDAO.updateKotlinMentionInfo(
-                chatId.toString(), userId.toString())
+        kotlinMentionsDAO.save(mentions)
     }
 }
