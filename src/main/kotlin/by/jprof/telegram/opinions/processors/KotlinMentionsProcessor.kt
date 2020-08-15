@@ -12,8 +12,10 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.TextCont
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.media.StickerContent
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
+import kotlinx.coroutines.time.delay
 import java.time.Duration
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import kotlin.random.Random
 
 class KotlinMentionsProcessor(
@@ -63,6 +65,7 @@ class KotlinMentionsProcessor(
         }
 
         val stickerMsg = sendSticker(contentMessage.chat.id, contentMessage.messageId)
+        delay(Duration.of(2, ChronoUnit.SECONDS))
         bot.sendTextMessage(contentMessage.chat.id,
                 composeStickerMessage(duration),
                 replyToMessageId = stickerMsg.messageId)
