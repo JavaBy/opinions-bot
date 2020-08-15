@@ -1,6 +1,7 @@
 package by.jprof.telegram.opinions.processors
 
 import by.jprof.telegram.opinions.dao.KotlinMentionsDAO
+import by.jprof.telegram.opinions.entity.KotlinMention
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.media.sendSticker
 import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.InputFile
@@ -8,9 +9,12 @@ import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.Request
 import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.toInputFile
 import com.github.insanusmokrassar.TelegramBotAPI.types.ChatId
 import com.github.insanusmokrassar.TelegramBotAPI.types.ChatIdentifier
+import com.github.insanusmokrassar.TelegramBotAPI.types.CommonUser
+import com.github.insanusmokrassar.TelegramBotAPI.types.TelegramDate
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageIdentifier
 import com.github.insanusmokrassar.TelegramBotAPI.types.chat.GroupChatImpl
-import com.github.insanusmokrassar.TelegramBotAPI.types.chat.abstracts.Chat
+import com.github.insanusmokrassar.TelegramBotAPI.types.message.AnonymousForwardInfo
+import com.github.insanusmokrassar.TelegramBotAPI.types.message.CommonMessageImpl
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.abstracts.ContentMessage
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.TextContent
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.media.StickerContent
@@ -47,16 +51,17 @@ class KotlinMentionsProcessorTest {
     @RelaxedMockK
     private lateinit var kotlinMentionsDAOMock: KotlinMentionsDAO
     private val expectedChatId = ChatId(1L)
+    private val expectedUserId = CommonUser(ChatId(1L), "soprano")
     private val expectedStickerMessageId: MessageIdentifier = 1L
     private val expectedPeriodReplyMessageId: MessageIdentifier = 2L
-    private val expectedStickerFileId = KotlinMentionsProcessor.zeroDaysWithoutKotlinStickerFileId.toInputFile()
+    private val expectedStickerFileId = "CAACA".toInputFile()
 
     @BeforeEach
     fun setUp() {
         val contentMessage = mockk<ContentMessage<StickerContent>>(relaxed = true) {
             every { messageId } returns expectedPeriodReplyMessageId
         }
-        coEvery { kotlinMentionsDAOMock.getKotlinLastMentionAt(any()) } returns null
+        coEvery { kotlinMentionsDAOMock.find(any()) } returns null
         mockkStatic("com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.media.SendStickerKt")
         coEvery { reqExecutorMock.sendSticker(any(), any(), replyToMessageId = any()) } returns contentMessage
     }
@@ -70,7 +75,7 @@ class KotlinMentionsProcessorTest {
     @Test
     fun `test second reply shouldn't be send if less than X hours spent since first reply`() = runBlocking {
         testStickerWasSent("I don't like kotlin")
-        coEvery { kotlinMentionsDAOMock.getKotlinLastMentionAt(any()) } returns Instant.now()
+        coEvery { kotlinMentionsDAOMock.find(any()) } returns kotlinMention(Instant.now())
         processUpdate("I don't like kotlin")
         // check by number of invocations that reply wasn't sent
         assertSticker()
@@ -83,8 +88,8 @@ class KotlinMentionsProcessorTest {
 
         // emulate some delay by shifting 'last-mention' value back
         coEvery {
-            kotlinMentionsDAOMock.getKotlinLastMentionAt(any())
-        } returns Instant.now().minus(2, ChronoUnit.HOURS)
+            kotlinMentionsDAOMock.find(any())
+        } returns kotlinMention(Instant.now().minus(2, ChronoUnit.HOURS))
 
         processUpdate("I don't like kotlin")
         assertSticker(exactly = 2)
@@ -149,7 +154,9 @@ class KotlinMentionsProcessorTest {
     }
 
     private suspend fun processUpdate(message: String) {
-        val processor = KotlinMentionsProcessor(reqExecutorMock, kotlinMentionsDAOMock)
+        val processor = KotlinMentionsProcessor(
+                reqExecutorMock, kotlinMentionsDAOMock,
+                stickerFileId = expectedStickerFileId.fileId)
         processor.process(MessageUpdate(1L, mockMessage(message)))
     }
 
@@ -175,15 +182,19 @@ class KotlinMentionsProcessorTest {
     }
 
     private fun mockMessage(text: String): ContentMessage<TextContent> {
-        return object : ContentMessage<TextContent> {
-            override val chat: Chat
-                get() = GroupChatImpl(expectedChatId, "jprofby")
-            override val content: TextContent
-                get() = TextContent(text)
-            override val date: DateTime
-                get() = DateTime.now()
-            override val messageId: MessageIdentifier
-                get() = expectedStickerMessageId
-        }
+        return CommonMessageImpl(
+                expectedStickerMessageId,
+                expectedUserId,
+                GroupChatImpl(expectedChatId, "jprofby"),
+                TextContent(text),
+                DateTime.now(),
+                DateTime.now(),
+                AnonymousForwardInfo(TelegramDate(DateTime.now()), "unknown"),
+                null, null, null, null)
     }
+
+    private fun kotlinMention(
+            timestamp: Instant,
+            chatId: ChatId = expectedChatId
+    ) = KotlinMention(chatId.chatId, timestamp)
 }

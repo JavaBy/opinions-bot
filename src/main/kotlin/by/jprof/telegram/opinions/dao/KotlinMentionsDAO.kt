@@ -1,39 +1,26 @@
 package by.jprof.telegram.opinions.dao
 
+import by.jprof.telegram.opinions.entity.CHAT_ID_ATTR
+import by.jprof.telegram.opinions.entity.KotlinMention
 import kotlinx.coroutines.future.await
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import java.time.Instant
 
 class KotlinMentionsDAO(
         private val dynamoDb: DynamoDbAsyncClient,
         private val table: String
 ) {
-    companion object {
-        private const val ID_ATTR = "chatId"
-        private const val VALUE_ATTR = "timestamp"
-    }
-
-    suspend fun updateKotlinLastMentionAt(id: String, instant: Instant) {
+    suspend fun save(mentions: KotlinMention) {
         dynamoDb.putItem {
             it.tableName(table)
-            it.item(
-                    mapOf(
-                            ID_ATTR to AttributeValue.builder().s(id).build(),
-                            VALUE_ATTR to AttributeValue.builder().n(instant.toEpochMilli().toString()).build()
-                    )
-            )
+            it.item(mentions.toAttrs())
         }.await()
     }
 
-    suspend fun getKotlinLastMentionAt(id: String): Instant? {
+    suspend fun find(id: String): KotlinMention? {
         return dynamoDb.getItem {
             it.tableName(table)
-            it.key(mapOf(ID_ATTR to AttributeValue.builder().s(id).build()))
+            it.key(mapOf(CHAT_ID_ATTR to id.toAttributeValue()))
         }.await()?.item()?.takeUnless { it.isEmpty() }
-                ?.let {
-                    val epoch = it[VALUE_ATTR] ?: throw IllegalStateException("Missing $VALUE_ATTR property")
-                    Instant.ofEpochMilli(epoch.n().toLong())
-                }
+                ?.let { KotlinMention.fromAttrs(it) }
     }
 }
