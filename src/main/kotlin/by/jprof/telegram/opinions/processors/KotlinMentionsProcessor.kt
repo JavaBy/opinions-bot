@@ -15,8 +15,10 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.media.St
 import com.github.insanusmokrassar.TelegramBotAPI.types.toChatId
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
+import kotlinx.coroutines.time.delay
 import java.time.Duration
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import kotlin.random.Random
 
 class KotlinMentionsProcessor(
@@ -58,6 +60,7 @@ class KotlinMentionsProcessor(
         val duration = computeDurationIfPassedEnoughTime(mentions.timestamp) ?: return
         val updatedMention = mentions.updateUserStats(userId)
         sendSticker(updatedMention, contentMessage.messageId) {
+            delay(Duration.of(2, ChronoUnit.SECONDS))
             bot.sendTextMessage(chatId.toChatId(),
                     composeStickerMessage(duration),
                     replyToMessageId = it.messageId)
