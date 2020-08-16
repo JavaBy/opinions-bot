@@ -7,16 +7,16 @@ abstract class CommandProcessor(
         private val cmd: String
 ) : UpdateProcessor {
     override suspend fun process(update: Update) {
-        if (isCommand(update)) {
+        if (isCommand(cmd, update)) {
             doProcess(update)
         }
     }
 
     abstract suspend fun doProcess(update: Update)
+}
 
-    private fun isCommand(update: Update): Boolean {
-        val text = update.asText() ?: return false
-        return (text.text.startsWith("/") &&
-                text.text.drop(1).split(" ")[0].split("@")[0] == cmd)
-    }
+fun isCommand(cmd: String, update: Update): Boolean {
+    val text = update.asText() ?: return false
+    return (text.text.startsWith("/") &&
+            text.text.drop(1).split(" ")[0].split("@")[0] == cmd)
 }
