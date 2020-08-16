@@ -16,10 +16,10 @@ class KotlinMentionsDAO(
         }.await()
     }
 
-    suspend fun find(id: String): KotlinMention? {
+    suspend fun find(chatId: Long): KotlinMention? {
         return dynamoDb.getItem {
             it.tableName(table)
-            it.key(mapOf(CHAT_ID_ATTR to id.toAttributeValue()))
+            it.key(mapOf(CHAT_ID_ATTR to chatId.toString().toAttributeValue()))
         }.await()?.item()?.takeUnless { it.isEmpty() }
                 ?.let { KotlinMention.fromAttrs(it) }
     }
