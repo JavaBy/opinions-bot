@@ -1,7 +1,9 @@
 package by.jprof.telegram.opinions.processors
 
+import com.github.insanusmokrassar.TelegramBotAPI.CommonAbstracts.TextPart
 import com.github.insanusmokrassar.TelegramBotAPI.types.ChatId
 import com.github.insanusmokrassar.TelegramBotAPI.types.CommonUser
+import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.BotCommandTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.TelegramDate
 import com.github.insanusmokrassar.TelegramBotAPI.types.chat.GroupChatImpl
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.AnonymousForwardInfo
@@ -36,7 +38,9 @@ internal class IsCommandTest {
             1L,
             CommonUser(ChatId(1L), "soprano"),
             GroupChatImpl(ChatId(1L), "jprofby"),
-            TextContent(text),
+            TextContent(text, entities = listOf(
+                    TextPart(IntRange(1, 10),
+                            BotCommandTextSource(text, emptyList())))),
             DateTime.now(),
             DateTime.now(),
             AnonymousForwardInfo(TelegramDate(DateTime.now()), "unknown"),

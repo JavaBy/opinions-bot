@@ -1,6 +1,8 @@
 package by.jprof.telegram.opinions.processors
 
 import by.jprof.telegram.opinions.dao.asText
+import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.BotCommandTextSource
+import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.fullEntitiesList
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
 
 abstract class CommandProcessor(
@@ -17,6 +19,5 @@ abstract class CommandProcessor(
 
 fun isCommand(cmd: String, update: Update): Boolean {
     val text = update.asText() ?: return false
-    return (text.text.startsWith("/") &&
-            text.text.drop(1).split(" ")[0].split("@")[0] == cmd)
+    return text.fullEntitiesList().any { it is BotCommandTextSource && it.command == cmd }
 }
