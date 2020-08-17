@@ -19,7 +19,7 @@ import java.util.Date
 class KotlinStatsCommandProcessor(
         private val bot: RequestsExecutor,
         private val kotlinMentionsDAO: KotlinMentionsDAO
-) : CommandProcessor("kotlin-stats") {
+) : CommandProcessor("kotlinstats") {
     override suspend fun doProcess(update: Update) {
         val message = (update as? MessageUpdate) ?: return
         val content = (message.data as? CommonMessageImpl<*>) ?: return

@@ -16,23 +16,23 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class IsCommandTest {
-    private val cmd = "kotlin-stats"
+    private val cmd = "kotlinstats"
 
     @Test
     fun `test calling command then should be called`() =
-            assertTrue(isCommand(cmd, mockMessage("/kotlin-stats")))
+            assertTrue(isCommand(cmd, mockMessage("/kotlinstats")))
 
     @Test
     fun `test calling command with bot username then should be called`() =
-            assertTrue(isCommand(cmd, mockMessage("/kotlin-stats@opinions-bot")))
+            assertTrue(isCommand(cmd, mockMessage("/kotlinstats@opinions-bot")))
 
     @Test
     fun `test typo in command then should not be called`() =
-            assertFalse(isCommand(cmd, mockMessage("/kotl1n-stats")))
+            assertFalse(isCommand(cmd, mockMessage("/kotl1nstats")))
 
     @Test
     fun `test command without leading slash then should not be called`() =
-            assertFalse(isCommand(cmd, mockMessage("kotlin-stats")))
+            assertFalse(isCommand(cmd, mockMessage("kotlinstats")))
 
     private fun mockMessage(text: String) = MessageUpdate(1, CommonMessageImpl(
             1L,
