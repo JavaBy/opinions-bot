@@ -27,7 +27,10 @@ class KotlinStatsCommandProcessor(
         val chatId = content.chat.id
         val mention = kotlinMentionsDAO.find(chatId.chatId) ?: return
         val topUsers = takeTopKotlinFans(chatId, mention.users, parseLimit(text.text))
-        bot.sendMessage(chatId, composeStatsMessage(topUsers), parseMode = MarkdownV2)
+        bot.sendMessage(chatId,
+                composeStatsMessage(topUsers),
+                parseMode = MarkdownV2,
+                replyToMessageId = content.messageId)
     }
 
     private suspend fun takeTopKotlinFans(
