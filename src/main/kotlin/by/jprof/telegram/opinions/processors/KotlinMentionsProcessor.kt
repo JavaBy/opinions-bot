@@ -58,7 +58,7 @@ class KotlinMentionsProcessor(
                         KotlinMention(chatId, Instant.now()),
                         contentMessage.messageId)
         val duration = computeDurationIfPassedEnoughTime(mentions.timestamp) ?: return
-        val updatedMention = mentions.updateUserStats(userId)
+        val updatedMention = mentions.update(userId, Instant.now())
         sendSticker(updatedMention, contentMessage.messageId) {
             delay(Duration.of(2, ChronoUnit.SECONDS))
             bot.sendTextMessage(chatId.toChatId(),
