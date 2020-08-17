@@ -51,7 +51,8 @@ fun parseLimit(cmd: String): Int =
         min(cmd.split("(\\s+)".toRegex()).getOrNull(1)?.toInt() ?: 3, 20)
 
 fun composeStatsMessage(topUsers: List<Pair<User, MentionStats>>): String {
-    val header = "%-35s%-15s%s%n".format("__Username__", "__Mentions__", "__Last mention at__")
+    val header = "Top %d kotlin fans%n%-35s%-15s%s%n".format(
+            topUsers.size, "__Username__", "__Mentions__", "__Last mention at__")
     return topUsers.joinToString(separator = "\n", prefix = header) { (user, stats) ->
         "%-35s%-15s%3\$tb %3\$td'%3\$ty at %3\$tR".format(
                 "${user.firstName} ${user.lastName}",
