@@ -57,22 +57,21 @@ class KotlinMentionsProcessor(
                 ?: return sendSticker(
                         KotlinMention(chatId, Instant.now()),
                         contentMessage.messageId)
-        val duration = computeDurationIfPassedEnoughTime(mentions.timestamp) ?: return
-        val updatedMention = mentions.update(userId, Instant.now())
+
+        val duration = Duration.between(mentions.timestamp, Instant.now())
+        var updatedMention = mentions.updateUserStats(userId)
+        if (!hasPassedEnoughTimeSincePreviousMention(duration)) {
+            kotlinMentionsDAO.save(updatedMention)
+            return
+        }
+
+        updatedMention = updatedMention.copy(timestamp = Instant.now())
         sendSticker(updatedMention, contentMessage.messageId) {
             delay(Duration.of(2, ChronoUnit.SECONDS))
             bot.sendTextMessage(chatId.toChatId(),
                     composeStickerMessage(duration),
                     replyToMessageId = it.messageId)
         }
-    }
-
-    private fun computeDurationIfPassedEnoughTime(lastTime: Instant): Duration? {
-        val duration = Duration.between(lastTime, Instant.now())
-        if (hasPassedEnoughTimeSincePreviousMention(duration)) {
-            return duration
-        }
-        return null
     }
 
     private suspend fun sendSticker(
