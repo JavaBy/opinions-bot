@@ -53,7 +53,7 @@ class KotlinMentionsProcessor(
         if (!containsMatchIn(textContent.text)) return
         val chatId = contentMessage.chat.id.chatId
         val userId = contentMessage.user.id.chatId
-        val mentions = kotlinMentionsDAO.find(chatId.toString())
+        val mentions = kotlinMentionsDAO.find(chatId)
                 ?: return sendSticker(
                         KotlinMention(chatId, Instant.now()),
                         contentMessage.messageId)
