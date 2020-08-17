@@ -16,11 +16,12 @@ internal class KotlinMentionTest {
         val now = Instant.now()
         val mention = KotlinMention(1, now, mapOf(111L to MentionStats(1, Instant.now())))
         TimeUnit.MILLISECONDS.sleep(1) // to ensure lastUpdatedAt > now
-        val updatedMention = mention.updateUserStats(111L)
+        val updatedMention = mention.update(111L, now)
         assertEquals(1, updatedMention.users.size)
         val (count, lastUpdatedAt) = updatedMention.users[111L] ?: fail("user")
         assertEquals(2, count)
         assertTrue(lastUpdatedAt.isAfter(now))
+        assertEquals(now, updatedMention.timestamp)
     }
 
     @Test
