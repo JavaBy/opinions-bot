@@ -15,8 +15,7 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.fullEnti
 import com.github.insanusmokrassar.TelegramBotAPI.types.toChatId
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
-import java.lang.Integer.min
-import java.util.*
+import java.util.Date
 
 class KotlinStatsCommandProcessor(
         private val bot: RequestsExecutor,
