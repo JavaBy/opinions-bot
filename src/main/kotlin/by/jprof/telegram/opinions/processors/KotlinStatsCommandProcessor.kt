@@ -55,7 +55,7 @@ class KotlinStatsCommandProcessor(
 fun extractLimit(text: TextContent): Int {
     val source = text.fullEntitiesList().firstOrNull { it is RegularTextSource }
     val limit = source as? RegularTextSource
-    return min(limit?.source?.trim()?.toIntOrNull() ?: 3, 20)
+    return limit?.source?.trim()?.toIntOrNull()?.coerceIn(1, 20) ?: 3
 }
 
 fun composeStatsMessage(topUsers: List<Pair<User, MentionStats>>): String {
