@@ -6,15 +6,17 @@ import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.chat.members.getChatMember
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.sendMessage
 import com.github.insanusmokrassar.TelegramBotAPI.types.ChatId
+import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.RegularTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.ParseMode.MarkdownV2
 import com.github.insanusmokrassar.TelegramBotAPI.types.User
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.CommonMessageImpl
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.TextContent
+import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.fullEntitiesList
 import com.github.insanusmokrassar.TelegramBotAPI.types.toChatId
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
 import java.lang.Integer.min
-import java.util.Date
+import java.util.*
 
 class KotlinStatsCommandProcessor(
         private val bot: RequestsExecutor,
@@ -26,7 +28,7 @@ class KotlinStatsCommandProcessor(
         val text = (content.content as? TextContent) ?: return
         val chatId = content.chat.id
         val mention = kotlinMentionsDAO.find(chatId.chatId) ?: return
-        val topUsers = takeTopKotlinFans(chatId, mention.users, parseLimit(text.text))
+        val topUsers = takeTopKotlinFans(chatId, mention.users, extractLimit(text))
         bot.sendMessage(chatId,
                 composeStatsMessage(topUsers),
                 parseMode = MarkdownV2,
@@ -50,8 +52,11 @@ class KotlinStatsCommandProcessor(
 
 }
 
-fun parseLimit(cmd: String): Int =
-        min(cmd.split("(\\s+)".toRegex()).getOrNull(1)?.toInt() ?: 3, 20)
+fun extractLimit(text: TextContent): Int {
+    val source = text.fullEntitiesList().firstOrNull { it is RegularTextSource }
+    val limit = source as? RegularTextSource
+    return min(limit?.source?.trim()?.toIntOrNull() ?: 3, 20)
+}
 
 fun composeStatsMessage(topUsers: List<Pair<User, MentionStats>>): String {
     val header = "Top %d kotlin fans%n%-35s%-15s%s%n".format(

@@ -9,13 +9,6 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 
 internal class KotlinStatsCommandProcessorKtTest {
-    @Test
-    fun testParseLimit() {
-        assertEquals(3, parseLimit("/cmd@bot"))
-        assertEquals(20, parseLimit("/cmd@bot 30"))
-        assertEquals(10, parseLimit("/cmd@bot  10"))
-        assertEquals(10, parseLimit("/cmd@bot  10 xxx"))
-    }
 
     @Test
     fun composeStatsMessage() {
