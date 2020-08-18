@@ -15,8 +15,7 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.fullEnti
 import com.github.insanusmokrassar.TelegramBotAPI.types.toChatId
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
-import java.lang.Integer.min
-import java.util.*
+import java.util.Date
 
 class KotlinStatsCommandProcessor(
         private val bot: RequestsExecutor,
@@ -55,7 +54,7 @@ class KotlinStatsCommandProcessor(
 fun extractLimit(text: TextContent): Int {
     val source = text.fullEntitiesList().firstOrNull { it is RegularTextSource }
     val limit = source as? RegularTextSource
-    return min(limit?.source?.trim()?.toIntOrNull() ?: 3, 20)
+    return limit?.source?.trim()?.toIntOrNull()?.coerceIn(1, 20) ?: 3
 }
 
 fun composeStatsMessage(topUsers: List<Pair<User, MentionStats>>): String {
