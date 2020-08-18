@@ -73,6 +73,28 @@ class KotlinMentionsProcessorTest {
     }
 
     @Test
+    fun `test sticker sending throttling doesnt affect mention stats`() = runBlocking {
+        coEvery { kotlinMentionsDAOMock.find(any()) } returns kotlinMention(Instant.now())
+
+        val slot = slot<KotlinMention>()
+
+        processUpdate("I don't like kotlin")
+        coVerify { kotlinMentionsDAOMock.save(capture(slot)) }
+        coEvery { kotlinMentionsDAOMock.find(any()) } returns slot.captured
+
+        processUpdate("I don't like kotlin")
+        coVerify { kotlinMentionsDAOMock.save(capture(slot)) }
+        coEvery { kotlinMentionsDAOMock.find(any()) } returns slot.captured
+
+        processUpdate("I don't like kotlin")
+        coVerify { kotlinMentionsDAOMock.save(capture(slot)) }
+        coEvery { kotlinMentionsDAOMock.find(any()) } returns slot.captured
+
+        assertEquals(1, slot.captured.users.size)
+        assertEquals(3, slot.captured.users[1]?.count)
+    }
+
+    @Test
     fun `test second reply shouldn't be send if less than X hours spent since first reply`() = runBlocking {
         testStickerWasSent("I don't like kotlin")
         coEvery { kotlinMentionsDAOMock.find(any()) } returns kotlinMention(Instant.now())

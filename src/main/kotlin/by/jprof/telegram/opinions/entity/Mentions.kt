@@ -31,11 +31,11 @@ data class KotlinMention(
         )
     }
 
-    fun update(userId: Long, timestamp: Instant): KotlinMention {
+    fun updateUserStats(userId: Long): KotlinMention {
         val updatedUsers = users.toMutableMap()
         val stats = updatedUsers[userId] ?: MentionStats(0, Instant.now())
         updatedUsers[userId] = MentionStats(stats.count + 1, Instant.now())
-        return copy(users = updatedUsers, timestamp = timestamp)
+        return copy(users = updatedUsers)
     }
 
     fun toAttrs(): Map<String, AttributeValue> = mapOf<String, AttributeValue>(
