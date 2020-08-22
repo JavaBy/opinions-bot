@@ -11,19 +11,14 @@ import java.io.FileOutputStream
 class Image2textKtTest {
     @TempDir
     lateinit var tessdata: File
-    lateinit var converter: Image2TextConverter
+    lateinit var converter: Tesseract
 
     @BeforeEach
     fun setUp() {
-        Lang.values().forEach { lang ->
-            this::class.java.classLoader.getResource("tessdata/${lang.label}.traineddata")?.openStream()?.use {
-                it.transferTo(FileOutputStream(File(tessdata, "${lang.label}.traineddata")))
-            }
-        }
         this::class.java.classLoader.getResource("ocr/1.jpg")?.openStream()?.use {
             it.transferTo(FileOutputStream(File(tessdata, "1.jpg")))
         }
-        converter = Image2TextConverter(tessdata)
+        converter = Tesseract()
     }
 
     @Test
