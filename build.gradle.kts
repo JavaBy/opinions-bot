@@ -42,7 +42,7 @@ dependencies {
     implementation("software.amazon.awssdk:dynamodb")
     implementation("com.google.api-client:google-api-client:1.23.0")
     implementation("com.google.apis:google-api-services-youtube:v3-rev222-1.25.0")
-    implementation("com.github.insanusmokrassar:TelegramBotAPI-all:0.27.6")
+    implementation("com.github.insanusmokrassar:TelegramBotAPI-all:0.27.11")
     implementation("org.bytedeco.javacpp-presets:tesseract-platform:4.0.0-1.4.4")
 
     testImplementation(platform("org.junit:junit-bom:5.6.0"))
