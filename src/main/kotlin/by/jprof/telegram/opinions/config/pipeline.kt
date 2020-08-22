@@ -25,7 +25,7 @@ val pipelineModule = module {
     }
 
     single<UpdateProcessor>(named("KotlinMentionsProcessor")) {
-        KotlinMentionsProcessor(get(), get())
+        KotlinMentionsProcessor(get(), get(), get(), get())
     }
 
     single<UpdateProcessor>(named("KotlinStatsCommandProcessor")) {

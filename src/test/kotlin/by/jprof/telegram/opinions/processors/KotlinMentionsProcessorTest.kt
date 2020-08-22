@@ -19,6 +19,7 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.message.abstracts.Conten
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.TextContent
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.media.StickerContent
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
+import com.github.insanusmokrassar.TelegramBotAPI.utils.TelegramAPIUrlsKeeper
 import com.soywiz.klock.DateTime
 import io.mockk.Called
 import io.mockk.coEvery
@@ -47,6 +48,8 @@ import java.time.temporal.ChronoUnit
 class KotlinMentionsProcessorTest {
     @RelaxedMockK
     private lateinit var reqExecutorMock: RequestsExecutor
+    @RelaxedMockK
+    private lateinit var tesseract: Tesseract
 
     @RelaxedMockK
     private lateinit var kotlinMentionsDAOMock: KotlinMentionsDAO
@@ -177,7 +180,8 @@ class KotlinMentionsProcessorTest {
 
     private suspend fun processUpdate(message: String) {
         val processor = KotlinMentionsProcessor(
-                reqExecutorMock, kotlinMentionsDAOMock,
+                reqExecutorMock, kotlinMentionsDAOMock, tesseract,
+                TelegramAPIUrlsKeeper("qwerty"),
                 stickerFileId = expectedStickerFileId.fileId)
         processor.process(MessageUpdate(1L, mockMessage(message)))
     }

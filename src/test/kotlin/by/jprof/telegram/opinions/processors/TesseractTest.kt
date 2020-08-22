@@ -8,7 +8,7 @@ import java.io.File
 import java.io.FileOutputStream
 
 
-class Image2textKtTest {
+class TesseractTest {
     @TempDir
     lateinit var tessdata: File
     lateinit var converter: Tesseract
