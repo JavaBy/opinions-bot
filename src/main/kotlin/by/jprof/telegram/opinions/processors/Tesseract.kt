@@ -25,12 +25,12 @@ class Tesseract(private val tessdatasrc: String = "tessdata") {
 
     private lateinit var tessdata: File
 
-    fun ocr(img: File, lang: Lang): String {
+    fun ocr(imgFile: File, lang: Lang): String {
         ensureTessdata()
         return tesseract.TessBaseAPI().use { api ->
             tesseract.TessBaseAPIInit2(api, tessdata.toString(), lang.label, tesseract.OEM_DEFAULT)
-            lept.pixRead(img.absolutePath).use {
-                tesseract.TessBaseAPISetImage2(api, it)
+            lept.pixRead(imgFile.absolutePath).use { img ->
+                tesseract.TessBaseAPISetImage2(api, img)
                 tesseract.TessBaseAPIRecognize(api, null/*monitor*/)
                 tesseract.TessBaseAPIGetIterator(api).use { resultIter ->
                     tesseract.TessResultIteratorGetUTF8Text(resultIter, tesseract.RIL_BLOCK).use { bytes ->
