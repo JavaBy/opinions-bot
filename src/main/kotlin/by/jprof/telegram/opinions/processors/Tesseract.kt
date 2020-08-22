@@ -13,7 +13,7 @@ enum class Lang(val label: String) {
     RUS("rus"), ENG("eng")
 }
 
-class Tesseract(private val tessdatapath: String = "tessdata") : AutoCloseable {
+class Tesseract(private val tessdatasrc: String = "tessdata") : AutoCloseable {
     companion object {
         fun copyTessdata(tessdatapath: String, dest: File) {
             Lang.values().forEach { lang ->
@@ -55,7 +55,7 @@ class Tesseract(private val tessdatapath: String = "tessdata") : AutoCloseable {
         if (!this::tessdata.isInitialized) {
             tessdata = Files.createTempDirectory("jprof-ocr").toFile()
             tessdata.deleteOnExit()
-            copyTessdata(tessdatapath, tessdata)
+            copyTessdata(tessdatasrc, tessdata)
         }
         check()
     }
