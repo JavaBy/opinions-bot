@@ -80,18 +80,18 @@ class KotlinMentionsProcessor(
 
     private suspend fun containsMatchIn(contentMessage: ContentMessage<*>): Boolean {
         val content = contentMessage.content
-        return (content is TextContent) && containsInText(content)
+        return (content is TextContent) && containsInText(content.text)
                 || (content is PhotoContent) && containsInImage(content)
     }
 
-    private fun containsInText(textContent: TextContent): Boolean =
-            kotlinRegex.containsMatchIn(textContent.text)
+    private fun containsInText(text: String): Boolean =
+            kotlinRegex.containsMatchIn(text)
 
     private suspend fun containsInImage(photoContent: PhotoContent): Boolean {
         val fileInfo = bot.getFileAdditionalInfo(photoContent.media.fileId)
         val imageFile = fileInfo.download(telegramAPIUrlsKeeper)
         return Lang.values().any {
-            kotlinRegex.containsMatchIn(tesseract.ocr(imageFile, it))
+            containsInText(tesseract.ocr(imageFile, it))
         }
     }
 
