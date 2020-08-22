@@ -11,15 +11,19 @@ import java.io.FileOutputStream
 class Image2textKtTest {
     @TempDir
     lateinit var tessdata: File
+    lateinit var converter: Image2TextConverter
 
     @BeforeEach
     fun setUp() {
-        this::class.java.classLoader.getResource("tessdata/rus.traineddata")?.openStream()?.use {
-            it.transferTo(FileOutputStream(File(tessdata, "rus.traineddata")))
+        Lang.values().forEach { lang ->
+            this::class.java.classLoader.getResource("tessdata/${lang.label}.traineddata")?.openStream()?.use {
+                it.transferTo(FileOutputStream(File(tessdata, "${lang.label}.traineddata")))
+            }
         }
         this::class.java.classLoader.getResource("ocr/1.jpg")?.openStream()?.use {
             it.transferTo(FileOutputStream(File(tessdata, "1.jpg")))
         }
+        converter = Image2TextConverter(tessdata)
     }
 
     @Test
@@ -53,6 +57,6 @@ class Image2textKtTest {
                 Ладно, извини что потревожил... Пойду писать
                 экстеншены.
                 """.trimIndent(),
-            image2text(File(tessdata, "1.jpg"), tessdata, Lang.RUS).trim()
+            converter.ocr(File(tessdata, "1.jpg"), Lang.RUS).trim()
     )
 }
