@@ -1,8 +1,10 @@
 package by.jprof.telegram.opinions.processors
 
 import by.jprof.telegram.opinions.dao.KotlinMentionsDAO
+import by.jprof.telegram.opinions.dao.download
 import by.jprof.telegram.opinions.entity.KotlinMention
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
+import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.get.getFileAdditionalInfo
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.media.sendSticker
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.sendTextMessage
 import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.toInputFile
@@ -11,10 +13,12 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.MessageIdentifier
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.CommonMessageImpl
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.abstracts.ContentMessage
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.TextContent
+import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.media.PhotoContent
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.media.StickerContent
 import com.github.insanusmokrassar.TelegramBotAPI.types.toChatId
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
+import com.github.insanusmokrassar.TelegramBotAPI.utils.TelegramAPIUrlsKeeper
 import kotlinx.coroutines.time.delay
 import java.time.Duration
 import java.time.Instant
@@ -24,9 +28,10 @@ import kotlin.random.Random
 class KotlinMentionsProcessor(
         private val bot: RequestsExecutor,
         private val kotlinMentionsDAO: KotlinMentionsDAO,
+        private val tesseract: Tesseract,
+        private val telegramAPIUrlsKeeper: TelegramAPIUrlsKeeper,
         private val stickerFileId: String = zeroDaysWithoutKotlinStickerFileId,
         private val hasPassedEnoughTimeSincePreviousMention: (Duration) -> Boolean = ::hasPassedEnoughTimeSincePreviousMention,
-        private val containsMatchIn: (String) -> Boolean = kotlinRegex::containsMatchIn,
         private val composeStickerMessage: (Duration) -> String = ::composeStickerMessage
 ) : UpdateProcessor {
     companion object {
@@ -49,8 +54,7 @@ class KotlinMentionsProcessor(
     override suspend fun process(update: Update) {
         val message = (update as? MessageUpdate) ?: return
         val contentMessage = (message.data as? CommonMessageImpl<*>) ?: return
-        val textContent = (contentMessage.content as? TextContent) ?: return
-        if (!containsMatchIn(textContent.text)) return
+        if (!containsMatchIn(contentMessage)) return
         val chatId = contentMessage.chat.id.chatId
         val userId = contentMessage.user.id.chatId
         val mentions = kotlinMentionsDAO.find(chatId)
@@ -71,6 +75,23 @@ class KotlinMentionsProcessor(
             bot.sendTextMessage(chatId.toChatId(),
                     composeStickerMessage(duration),
                     replyToMessageId = it.messageId)
+        }
+    }
+
+    private suspend fun containsMatchIn(contentMessage: ContentMessage<*>): Boolean {
+        val content = contentMessage.content
+        return (content is TextContent) && containsInText(content.text)
+                || (content is PhotoContent) && containsInImage(content)
+    }
+
+    private fun containsInText(text: String): Boolean =
+            kotlinRegex.containsMatchIn(text)
+
+    private suspend fun containsInImage(photoContent: PhotoContent): Boolean {
+        val fileInfo = bot.getFileAdditionalInfo(photoContent.media.fileId)
+        val imageFile = fileInfo.download(telegramAPIUrlsKeeper)
+        return Lang.values().any {
+            containsInText(tesseract.ocr(imageFile, it))
         }
     }
 
