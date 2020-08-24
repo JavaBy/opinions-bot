@@ -1,7 +1,13 @@
 package by.jprof.telegram.opinions.processors
 
-import org.bytedeco.javacpp.lept
-import org.bytedeco.javacpp.tesseract
+import org.bytedeco.leptonica.global.lept.pixRead
+import org.bytedeco.tesseract.TessBaseAPI
+import org.bytedeco.tesseract.global.tesseract
+import org.bytedeco.tesseract.global.tesseract.TessBaseAPIGetIterator
+import org.bytedeco.tesseract.global.tesseract.TessBaseAPIInit2
+import org.bytedeco.tesseract.global.tesseract.TessBaseAPIRecognize
+import org.bytedeco.tesseract.global.tesseract.TessBaseAPISetImage2
+import org.bytedeco.tesseract.global.tesseract.TessResultIteratorGetUTF8Text
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -27,13 +33,13 @@ class Tesseract(private val tessdatasrc: String = "tessdata") {
 
     fun ocr(imgFile: File, lang: Lang): String {
         ensureTessdata()
-        return tesseract.TessBaseAPI().use { api ->
-            tesseract.TessBaseAPIInit2(api, tessdata.toString(), lang.label, tesseract.OEM_DEFAULT)
-            lept.pixRead(imgFile.absolutePath).use { img ->
-                tesseract.TessBaseAPISetImage2(api, img)
-                tesseract.TessBaseAPIRecognize(api, null/*monitor*/)
-                tesseract.TessBaseAPIGetIterator(api).use { resultIter ->
-                    tesseract.TessResultIteratorGetUTF8Text(resultIter, tesseract.RIL_BLOCK).use { bytes ->
+        return TessBaseAPI().use { api ->
+            TessBaseAPIInit2(api, tessdata.toString(), lang.label, tesseract.OEM_DEFAULT)
+            pixRead(imgFile.absolutePath).use { img ->
+                TessBaseAPISetImage2(api, img)
+                TessBaseAPIRecognize(api, null/*monitor*/)
+                TessBaseAPIGetIterator(api).use { resultIter ->
+                    TessResultIteratorGetUTF8Text(resultIter, tesseract.RIL_BLOCK).use { bytes ->
                         String(bytes.stringBytes, StandardCharsets.UTF_8)
                     }
                 }
