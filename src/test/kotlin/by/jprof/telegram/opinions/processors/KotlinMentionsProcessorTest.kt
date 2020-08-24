@@ -2,6 +2,7 @@ package by.jprof.telegram.opinions.processors
 
 import by.jprof.telegram.opinions.dao.KotlinMentionsDAO
 import by.jprof.telegram.opinions.entity.KotlinMention
+import com.github.insanusmokrassar.TelegramBotAPI.CommonAbstracts.TextPart
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.media.sendSticker
 import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.InputFile
@@ -10,6 +11,7 @@ import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.toInputFile
 import com.github.insanusmokrassar.TelegramBotAPI.types.ChatId
 import com.github.insanusmokrassar.TelegramBotAPI.types.ChatIdentifier
 import com.github.insanusmokrassar.TelegramBotAPI.types.CommonUser
+import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.BotCommandTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.TelegramDate
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageIdentifier
 import com.github.insanusmokrassar.TelegramBotAPI.types.chat.GroupChatImpl
@@ -73,6 +75,15 @@ class KotlinMentionsProcessorTest {
     fun tearDown() {
         confirmVerified(reqExecutorMock)
         unmockkAll()
+    }
+
+    @Test
+    fun `test processor should not handle bot commands`() = runBlocking {
+        val message = mockMessage("/kotlinstats@JProfOpinionsBot", entities = listOf(
+                TextPart(1..10, BotCommandTextSource("/kotlinstats@JProfOpinionsBot", emptyList()))
+        ))
+        processUpdate(MessageUpdate(1L, message))
+        coVerify(exactly=0) { reqExecutorMock.sendSticker(any(), any(), replyToMessageId = any())}
     }
 
     @Test
@@ -179,11 +190,15 @@ class KotlinMentionsProcessorTest {
     }
 
     private suspend fun processUpdate(message: String) {
+        processUpdate(MessageUpdate(1L, mockMessage(message)))
+    }
+
+    private suspend fun processUpdate(message: MessageUpdate) {
         val processor = KotlinMentionsProcessor(
                 reqExecutorMock, kotlinMentionsDAOMock, tesseract,
                 TelegramAPIUrlsKeeper("qwerty"),
                 stickerFileId = expectedStickerFileId.fileId)
-        processor.process(MessageUpdate(1L, mockMessage(message)))
+        processor.process(message)
     }
 
     private fun testStickerWasSent(message: String) = runBlocking {
@@ -207,12 +222,15 @@ class KotlinMentionsProcessorTest {
         assertEquals(expectedStickerMessageId, replyToMessageIdSlot.captured)
     }
 
-    private fun mockMessage(text: String): ContentMessage<TextContent> {
+    private fun mockMessage(
+            text: String,
+            entities: List<TextPart> = emptyList()
+    ): ContentMessage<TextContent> {
         return CommonMessageImpl(
                 expectedStickerMessageId,
                 expectedUserId,
                 GroupChatImpl(expectedChatId, "jprofby"),
-                TextContent(text),
+                TextContent(text, entities = entities),
                 DateTime.now(),
                 DateTime.now(),
                 AnonymousForwardInfo(TelegramDate(DateTime.now()), "unknown"),
