@@ -186,7 +186,7 @@ class KotlinMentionsProcessorTest {
     @Test
     fun `test without kotlin mentioning then sticker shouldn't be sent`() = runBlocking {
         processUpdate("Любимый вопрос после собеса \"Часто ли пользуетесь тем о чем сейчас спрашивали?\"")
-        coVerify { reqExecutorMock.execute(any<Request<*>>()) wasNot Called }
+        coVerify(exactly = 0) { reqExecutorMock.sendSticker(any(), any(), replyToMessageId = any()) }
     }
 
     private suspend fun processUpdate(message: String) {
