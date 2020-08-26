@@ -9,10 +9,12 @@ import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.media.send
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.sendTextMessage
 import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.toInputFile
 import com.github.insanusmokrassar.TelegramBotAPI.types.ChatId
+import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.BotCommandTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageIdentifier
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.CommonMessageImpl
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.abstracts.ContentMessage
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.TextContent
+import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.fullEntitiesList
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.media.PhotoContent
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.media.StickerContent
 import com.github.insanusmokrassar.TelegramBotAPI.types.toChatId
@@ -80,12 +82,15 @@ class KotlinMentionsProcessor(
 
     private suspend fun containsMatchIn(contentMessage: ContentMessage<*>): Boolean {
         val content = contentMessage.content
-        return (content is TextContent) && containsInText(content.text)
-                || (content is PhotoContent) && containsInImage(content)
+        return ((content is TextContent) && !hasCommand(content) && containsInText(content.text))
+                || ((content is PhotoContent) && containsInImage(content))
     }
 
     private fun containsInText(text: String): Boolean =
             kotlinRegex.containsMatchIn(text)
+
+    private fun hasCommand(textContent: TextContent): Boolean =
+            textContent.fullEntitiesList().any { it is BotCommandTextSource }
 
     private suspend fun containsInImage(photoContent: PhotoContent): Boolean {
         val fileInfo = bot.getFileAdditionalInfo(photoContent.media.fileId)
