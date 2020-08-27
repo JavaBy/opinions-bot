@@ -1,7 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.gradle.internal.os.OperatingSystem
 
 plugins {
     kotlin("jvm").version("1.3.71")
