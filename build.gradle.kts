@@ -3,15 +3,10 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCach
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.gradle.internal.os.OperatingSystem
 
-val os = OperatingSystem.current()
-// javacpp use "x86_64" name for "amd64"
-val nativePrefix = os.nativePrefix.replace("amd64", "x86_64")
-val tesseractVersion = "4.0.0-1.5"
-val leptonicaVersion = "1.78.0-1.5"
-
 plugins {
     kotlin("jvm").version("1.3.71")
     id("com.github.johnrengelman.shadow").version("5.2.0")
+    id("org.bytedeco.gradle-javacpp-platform").version("1.5.4-SNAPSHOT")
 }
 
 repositories {
@@ -50,10 +45,7 @@ dependencies {
     implementation("com.google.api-client:google-api-client:1.23.0")
     implementation("com.google.apis:google-api-services-youtube:v3-rev222-1.25.0")
     implementation("com.github.insanusmokrassar:TelegramBotAPI-all:0.27.11")
-    implementation("org.bytedeco", "tesseract", version = tesseractVersion, classifier = nativePrefix)
-    implementation("org.bytedeco", "tesseract", version = tesseractVersion)
-    implementation("org.bytedeco", "leptonica", version = leptonicaVersion, classifier = nativePrefix)
-    implementation("org.bytedeco", "leptonica", version = leptonicaVersion)
+    implementation("org.bytedeco:tesseract-platform:4.0.0-1.5")
 
     testImplementation(platform("org.junit:junit-bom:5.6.0"))
     testRuntimeOnly(platform("org.junit:junit-bom:5.6.0"))
