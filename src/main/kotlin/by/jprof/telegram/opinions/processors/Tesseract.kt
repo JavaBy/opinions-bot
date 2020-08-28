@@ -48,15 +48,26 @@ class Tesseract(private val tessdatasrc: String = "tessdata") {
     }
 
     private fun ensureTessdata() {
-        if (!this::tessdata.isInitialized) {
-            tessdata = Files.createTempDirectory("jprof-ocr").toFile()
-            tessdata.deleteOnExit()
-            copyTessdata(tessdatasrc, tessdata)
+        if (this::tessdata.isInitialized) {
+            check(tessdata)
+            return
         }
-        check()
+
+        // if tess data already prepared - use it
+        System.getenv("OPINIONS_LAYER_PATH")?.let {
+            tessdata = File(it)
+            check(tessdata)
+            return
+        }
+
+        // otherwise try to find them among resources
+        tessdata = Files.createTempDirectory("jprof-ocr").toFile()
+        tessdata.deleteOnExit()
+        copyTessdata(tessdatasrc, tessdata)
+        check(tessdata)
     }
 
-    private fun check() {
+    private fun check(tessdata: File) {
         if (!tessdata.isDirectory) {
             throw IOException("'tessdata' exists but is not a directory")
         }
