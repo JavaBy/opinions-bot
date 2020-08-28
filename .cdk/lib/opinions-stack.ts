@@ -35,7 +35,7 @@ export class OpinionsStack extends cdk.Stack {
 			functionName: 'opinions-webhook',
 			runtime: lambda.Runtime.JAVA_11,
 			timeout: Duration.seconds(30),
-			memorySize: 512,
+			memorySize: 1024,
 			code: lambda.Code.fromAsset('../build/libs/opinions-bot-all.jar'),
 			handler: 'by.jprof.telegram.opinions.Handler',
 			environment: {
