@@ -45,6 +45,7 @@ export class OpinionsStack extends cdk.Stack {
 				'TABLE_VOTES': votestTable.tableName,
 				'TABLE_YOUTUBE_CHANNELS_WHITELIST': youtubeChannelsWhitelistTable.tableName,
 				'TABLE_KOTLIN_MENTIONS': kotlinMentionsTable.tableName,
+				'OPINIONS_LAYER_PATH': '/opt/java/lib',
 			},
 			layers: [layer]
 		});
