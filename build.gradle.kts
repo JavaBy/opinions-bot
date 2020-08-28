@@ -62,6 +62,10 @@ tasks {
     }
     val shadowJar by getting(ShadowJar::class) {
         transform(Log4j2PluginsCacheFileTransformer::class.java)
+        filesMatching("**/tessdata") {
+            exclude()
+        }
+        dependsOn("layer")
     }
     test {
         useJUnitPlatform()
