@@ -20,10 +20,14 @@ enum class Lang(val label: String) {
 
 class Tesseract(private val tessdatasrc: String = "tessdata") {
     companion object {
-        private fun copyTessdata(tessdatapath: String, dest: File) {
+        private fun copyTessdata(tessdatapath: String, destdir: File) {
+            val cl = this::class.java.classLoader
             Lang.values().forEach { lang ->
-                this::class.java.classLoader.getResource("${tessdatapath}/${lang.label}.traineddata")?.openStream()?.use {
-                    it.transferTo(FileOutputStream(File(dest, "${lang.label}.traineddata")))
+                val name = "${lang.label}.traineddata"
+                val from = "${tessdatapath}/$name"
+                val to = File(destdir, name)
+                cl.getResource(from)?.openStream()?.use {
+                    it.copyTo(FileOutputStream(to))
                 }
             }
         }
