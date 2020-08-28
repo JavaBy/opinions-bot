@@ -66,4 +66,14 @@ tasks {
     test {
         useJUnitPlatform()
     }
+    register<Copy>("copyLayer") {
+        from("src/main/resources/tessdata/")
+        into("$buildDir/layer/java/lib")
+    }
+    register<Zip>("layer") {
+        dependsOn("copyLayer")
+        archiveFileName.set("layer.zip")
+        destinationDirectory.set(file(buildDir))
+        from("$buildDir/layer")
+    }
 }
