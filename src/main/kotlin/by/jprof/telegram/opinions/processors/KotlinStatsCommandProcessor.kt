@@ -15,7 +15,11 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.fullEnti
 import com.github.insanusmokrassar.TelegramBotAPI.types.toChatId
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
+import com.github.insanusmokrassar.TelegramBotAPI.utils.extensions.escapeMarkdownV2Common
+import com.google.api.client.util.StringUtils
+import org.joda.time.Instant
 import java.util.Date
+import java.util.Locale
 
 class KotlinStatsCommandProcessor(
         private val bot: RequestsExecutor,
@@ -58,12 +62,24 @@ fun extractLimit(text: TextContent): Int {
 }
 
 fun composeStatsMessage(topUsers: List<Pair<User, MentionStats>>): String {
-    val header = "Top %d kotlin fans%n%-35s%-15s%s%n".format(
-            topUsers.size, "__Username__", "__Mentions__", "__Last mention at__")
-    return topUsers.joinToString(separator = "\n", prefix = header) { (user, stats) ->
-        "%-35s%-15s%3\$tb %3\$td'%3\$ty at %3\$tR".format(
-                "${user.firstName} ${user.lastName}",
+    val header = """
+       Top %d Kotlin fans:
+       ```
+       Username       Mentions       Last mention
+
+    """.trimIndent().format(topUsers.size)
+    return topUsers.joinToString(separator = "\n", prefix = header, postfix = "```") { (user, stats) ->
+        val username = "${user.firstName} ${user.lastName}"
+
+        "%-15s%-15s%3\$te %3\$tB @ %3\$tH:%3\$tM".format(
+                Locale("be", "BY"),
+                if (username.length < 13) {
+                    username
+                } else {
+                    username.take(13) + "…"
+                },
                 stats.count,
-                Date.from(stats.lastUpdatedAt))
+                Date.from(stats.lastUpdatedAt)
+        ).escapeMarkdownV2Common()
     }
 }

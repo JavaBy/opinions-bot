@@ -14,10 +14,11 @@ internal class KotlinStatsCommandProcessorKtTest {
     fun composeStatsMessage() {
         assertEquals(
                 """
-                    Top 2 kotlin fans
-                    __Username__                       __Mentions__   __Last mention at__
-                    Tony Soprano                       1              Jan 01'20 at 23:15
-                    Silvio Dante                       2              Feb 01'20 at 13:35
+                    Top 2 Kotlin fans:
+                    ```
+                    Username       Mentions       Last mention
+                    Tony Soprano   1              1 студзеня @ 23:15
+                    Silvio Dante   2              1 лютага @ 13:35```
                 """.trimIndent(),
                 composeStatsMessage(listOf(
                         CommonUser(
