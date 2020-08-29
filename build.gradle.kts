@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm").version("1.3.71")
     id("com.github.johnrengelman.shadow").version("5.2.0")
+    id("org.bytedeco.gradle-javacpp-platform").version("1.5.4-SNAPSHOT")
 }
 
 repositories {
@@ -43,7 +44,7 @@ dependencies {
     implementation("com.google.api-client:google-api-client:1.23.0")
     implementation("com.google.apis:google-api-services-youtube:v3-rev222-1.25.0")
     implementation("com.github.insanusmokrassar:TelegramBotAPI-all:0.27.11")
-    implementation("org.bytedeco.javacpp-presets:tesseract-platform:4.0.0-1.4.4")
+    implementation("org.bytedeco:tesseract-platform:4.0.0-1.5")
 
     testImplementation(platform("org.junit:junit-bom:5.6.0"))
     testRuntimeOnly(platform("org.junit:junit-bom:5.6.0"))
@@ -61,8 +62,20 @@ tasks {
     }
     val shadowJar by getting(ShadowJar::class) {
         transform(Log4j2PluginsCacheFileTransformer::class.java)
+        exclude("**/tessdata/")
+        dependsOn("layer")
     }
     test {
         useJUnitPlatform()
+    }
+    register<Copy>("copyLayer") {
+        from("src/main/resources/tessdata/")
+        into("$buildDir/layer/java/lib")
+    }
+    register<Zip>("layer") {
+        dependsOn("copyLayer")
+        archiveFileName.set("layer.zip")
+        destinationDirectory.set(file(buildDir))
+        from("$buildDir/layer")
     }
 }
