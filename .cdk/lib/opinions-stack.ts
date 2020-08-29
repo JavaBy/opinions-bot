@@ -26,7 +26,7 @@ export class OpinionsStack extends cdk.Stack {
 		});
 
 		const layer = new lambda.LayerVersion(this, 'Opinions Layer', {
-			code: lambda.Code.fromAsset('../build/layer.zip'),
+			code: lambda.Code.fromAsset('../build/distributions/layer.zip'),
 			compatibleRuntimes: [lambda.Runtime.JAVA_11],
 			description: 'Heavy resources(tesseract, etc) to reduce bundle size',
 		});
