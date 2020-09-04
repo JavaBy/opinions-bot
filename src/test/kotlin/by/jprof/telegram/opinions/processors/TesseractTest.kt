@@ -11,14 +11,13 @@ import java.io.FileOutputStream
 class TesseractTest {
     @TempDir
     lateinit var tessdata: File
-    lateinit var converter: Tesseract
+    private var converter = Tesseract()
 
     @BeforeEach
     fun setUp() {
         this::class.java.classLoader.getResource("ocr/1.jpg")?.openStream()?.use {
             it.transferTo(FileOutputStream(File(tessdata, "1.jpg")))
         }
-        converter = Tesseract()
     }
 
     @Test
