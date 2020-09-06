@@ -12,7 +12,6 @@ import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyResponseEvent
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.UpdateDeserializationStrategy
-import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.json.Json
 import org.apache.logging.log4j.LogManager
 import org.koin.core.KoinComponent
@@ -24,7 +23,6 @@ val OK = APIGatewayV2ProxyResponseEvent().apply {
     body = "{}"
 }
 
-@ImplicitReflectionSerializer
 class Handler : RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent>, KoinComponent {
     companion object {
         val logger = LogManager.getLogger(Handler::class.java)!!
@@ -42,7 +40,7 @@ class Handler : RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyR
     override fun handleRequest(input: APIGatewayV2ProxyRequestEvent, context: Context): APIGatewayV2ProxyResponseEvent {
         logger.debug("Incoming request: {}", input)
 
-        val update = json.parse(UpdateDeserializationStrategy, input.body ?: return OK)
+        val update = json.decodeFromString(UpdateDeserializationStrategy, input.body ?: return OK)
 
         logger.debug("Parsed update: {}", update)
 

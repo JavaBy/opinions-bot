@@ -3,7 +3,8 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCach
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm").version("1.3.71")
+    kotlin("jvm").version("1.4.0")
+    kotlin("plugin.serialization").version("1.4.0")
     id("com.github.johnrengelman.shadow").version("5.2.0")
     id("org.bytedeco.gradle-javacpp-platform").version("1.5.4-SNAPSHOT")
 }
@@ -37,9 +38,9 @@ dependencies {
     implementation("com.amazonaws:aws-lambda-java-log4j2:1.1.0")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.13.3")
     implementation("org.koin:koin-core:2.1.5")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.5")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.9")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0-RC")
     implementation("software.amazon.awssdk:dynamodb")
     implementation("com.google.api-client:google-api-client:1.23.0")
     implementation("com.google.apis:google-api-services-youtube:v3-rev222-1.25.0")
