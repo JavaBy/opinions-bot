@@ -1,10 +1,9 @@
 package by.jprof.telegram.opinions.processors
 
 import by.jprof.telegram.opinions.dao.KotlinMentionsDAO
-import by.jprof.telegram.opinions.dao.download
 import by.jprof.telegram.opinions.entity.KotlinMention
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
-import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.get.getFileAdditionalInfo
+import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.downloadFile
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.media.sendSticker
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.sendTextMessage
 import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.toInputFile
@@ -81,9 +80,11 @@ class KotlinMentionsProcessor(
     }
 
     private suspend fun containsMatchIn(contentMessage: ContentMessage<*>): Boolean {
-        val content = contentMessage.content
-        return ((content is TextContent) && !hasCommand(content) && containsInText(content.text))
-                || ((content is PhotoContent) && containsInImage(content))
+        return when(val content = contentMessage.content) {
+            is TextContent -> !hasCommand(content) && containsInText(content.text)
+            is PhotoContent -> containsInImage(content)
+            else -> false
+        }
     }
 
     private fun containsInText(text: String): Boolean =
@@ -93,11 +94,13 @@ class KotlinMentionsProcessor(
             textContent.fullEntitiesList().any { it is BotCommandTextSource }
 
     private suspend fun containsInImage(photoContent: PhotoContent): Boolean {
-        val fileInfo = bot.getFileAdditionalInfo(photoContent.media.fileId)
-        val imageFile = fileInfo.download(telegramAPIUrlsKeeper)
-        return Lang.values().any {
+        val imageFile = createTempFile("ocr")
+        imageFile.writeBytes(bot.downloadFile(photoContent.media.fileId))
+        val contains = Lang.values().any {
             containsInText(tesseract.ocr(imageFile, it))
         }
+        imageFile.delete()
+        return contains
     }
 
     private suspend fun sendSticker(
