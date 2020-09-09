@@ -21,6 +21,7 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
 import com.github.insanusmokrassar.TelegramBotAPI.utils.TelegramAPIUrlsKeeper
 import kotlinx.coroutines.time.delay
+import kotlinx.coroutines.time.withTimeout
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -94,13 +95,16 @@ class KotlinMentionsProcessor(
             textContent.fullEntitiesList().any { it is BotCommandTextSource }
 
     private suspend fun containsInImage(photoContent: PhotoContent): Boolean {
-        val imageFile = createTempFile("ocr")
-        imageFile.writeBytes(bot.downloadFile(photoContent.media.fileId))
-        val contains = Lang.values().any {
-            containsInText(tesseract.ocr(imageFile, it))
+        withTimeout(Duration.ofSeconds(20)){
+            val imageFile = createTempFile("ocr")
+            imageFile.writeBytes(bot.downloadFile(photoContent.media.fileId))
+            val contains = Lang.values().any {
+                containsInText(tesseract.ocr(imageFile, it))
+            }
+            imageFile.delete()
+            return@withTimeout contains
         }
-        imageFile.delete()
-        return contains
+        return false
     }
 
     private suspend fun sendSticker(
