@@ -140,17 +140,21 @@ class YoutubeLinksProcessor(
         logger.debug("process callback: $callbackQuery")
 
         if (callbackQuery is MessageDataCallbackQuery) {
-            val (youtubeVideoId, vote) = callbackQuery.data.split(":")
-            val votes = getVotesByYoutubeId(youtubeVideoId)
-            val fromUserId = callbackQuery.user.id.chatId.toString()
-            val updatedVotes = votes.copy(votes = votes.votes + (fromUserId to vote))
+            if (callbackQuery.data.startsWith("JEP")) {
+                val (youtubeVideoId, vote) = callbackQuery.data.split(":")
+                val votes = getVotesByYoutubeId(youtubeVideoId)
+                val fromUserId = callbackQuery.user.id.chatId.toString()
+                val updatedVotes = votes.copy(votes = votes.votes + (fromUserId to vote))
 
-            votesDAO.save(updatedVotes)
-            bot.answerCallbackQuery(callbackQuery = callbackQuery)
-            bot.editMessageReplyMarkup(
-                    message = callbackQuery.message,
-                    replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(updatedVotes, youtubeVideoId))
-            )
+                votesDAO.save(updatedVotes)
+                bot.answerCallbackQuery(callbackQuery = callbackQuery)
+                bot.editMessageReplyMarkup(
+                        message = callbackQuery.message,
+                        replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(updatedVotes, youtubeVideoId))
+                )
+            } else {
+                logger.debug("Unknown callback query. Skipping")
+            }
         }
     }
 }

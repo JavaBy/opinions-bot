@@ -1,5 +1,6 @@
 package by.jprof.telegram.opinions.config
 
+import by.jprof.telegram.opinions.dao.KeyboardsDAO
 import by.jprof.telegram.opinions.dao.KotlinMentionsDAO
 import by.jprof.telegram.opinions.dao.VotesDAO
 import by.jprof.telegram.opinions.dao.YoutubeDAO
@@ -30,6 +31,13 @@ val dynamoModule = module {
         KotlinMentionsDAO(
                 get(),
                 get(named(TABLE_KOTLIN_MENTIONS))
+        )
+    }
+
+    single {
+        KeyboardsDAO(
+                get(),
+                get(named(TABLE_KEYBOARDS))
         )
     }
 }

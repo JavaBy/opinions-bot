@@ -80,7 +80,6 @@ class JEPLinksProcessor(
                             message = callbackQuery.message,
                             replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(updatedVotes, votesId))
                     )
-
                 } else {
                     logger.debug("Unknown callback query. Skipping")
                 }
@@ -99,7 +98,6 @@ class JEPLinksProcessor(
                 parseMode = MarkdownV2ParseMode,
                 replyToMessageId = message.messageId,
                 replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, votesId))
-
         )
     }
 

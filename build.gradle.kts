@@ -6,7 +6,7 @@ plugins {
     kotlin("jvm").version("1.4.0")
     kotlin("plugin.serialization").version("1.4.0")
     id("com.github.johnrengelman.shadow").version("5.2.0")
-    id("org.bytedeco.gradle-javacpp-platform").version("1.5.4-SNAPSHOT")
+    id("org.bytedeco.gradle-javacpp-platform").version("1.5.4")
 }
 
 repositories {

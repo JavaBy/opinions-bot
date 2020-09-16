@@ -9,8 +9,13 @@ export class OpinionsStack extends cdk.Stack {
 	constructor(scope: cdk.Construct, id: string, props: OpinionsStackProps) {
 		super(scope, id, props);
 
-		const votestTable = new dynamodb.Table(this, 'opinions-votes', {
+		const votesTable = new dynamodb.Table(this, 'opinions-votes', {
 			tableName: 'opinions-votes',
+			partitionKey: {name: 'id', type: dynamodb.AttributeType.STRING},
+			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+		});
+		const keyboardsTable = new dynamodb.Table(this, 'opinions-keyboards', {
+			tableName: 'opinions-keyboards',
 			partitionKey: {name: 'id', type: dynamodb.AttributeType.STRING},
 			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
 		});
@@ -42,7 +47,8 @@ export class OpinionsStack extends cdk.Stack {
 				'LOG_THRESHOLD': 'DEBUG',
 				'TELEGRAM_BOT_TOKEN': props.telegramToken,
 				'YOUTUBE_API_TOKEN': props.youtubeToken,
-				'TABLE_VOTES': votestTable.tableName,
+				'TABLE_VOTES': votesTable.tableName,
+				'TABLE_KEYBOARDS': keyboardsTable.tableName,
 				'TABLE_YOUTUBE_CHANNELS_WHITELIST': youtubeChannelsWhitelistTable.tableName,
 				'TABLE_KOTLIN_MENTIONS': kotlinMentionsTable.tableName,
 				'OPINIONS_LAYER_PATH': '/opt/java/lib',
@@ -50,7 +56,8 @@ export class OpinionsStack extends cdk.Stack {
 			layers: [layer]
 		});
 
-		votestTable.grantReadWriteData(lambdaFunctionWebhook);
+		votesTable.grantReadWriteData(lambdaFunctionWebhook);
+		keyboardsTable.grantReadData(lambdaFunctionWebhook);
 		youtubeChannelsWhitelistTable.grantReadData(lambdaFunctionWebhook);
 		kotlinMentionsTable.grantReadWriteData(lambdaFunctionWebhook);
 
