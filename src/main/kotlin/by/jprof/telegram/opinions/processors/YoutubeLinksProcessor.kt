@@ -141,7 +141,7 @@ class YoutubeLinksProcessor(
 
         if (callbackQuery is MessageDataCallbackQuery) {
             val data = callbackQuery.data
-            if (data.startsWith("JEP") || data.startsWith("YOUTUBE")) {
+            if (data.startsWith("YOUTUBE")) {
                 val (youtubeVideoId, vote) = data.split(":")
                 val votes = getVotesByYoutubeId(youtubeVideoId)
                 val fromUserId = callbackQuery.user.id.chatId.toString()
