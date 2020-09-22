@@ -140,8 +140,9 @@ class YoutubeLinksProcessor(
         logger.debug("process callback: $callbackQuery")
 
         if (callbackQuery is MessageDataCallbackQuery) {
-            if (callbackQuery.data.startsWith("JEP")) {
-                val (youtubeVideoId, vote) = callbackQuery.data.split(":")
+            val data = callbackQuery.data
+            if (data.startsWith("JEP") || data.startsWith("YOUTUBE")) {
+                val (youtubeVideoId, vote) = data.split(":")
                 val votes = getVotesByYoutubeId(youtubeVideoId)
                 val fromUserId = callbackQuery.user.id.chatId.toString()
                 val updatedVotes = votes.copy(votes = votes.votes + (fromUserId to vote))
@@ -157,4 +158,5 @@ class YoutubeLinksProcessor(
             }
         }
     }
+
 }
