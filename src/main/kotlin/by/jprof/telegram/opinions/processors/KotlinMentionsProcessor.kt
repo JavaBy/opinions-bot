@@ -83,7 +83,7 @@ class KotlinMentionsProcessor(
     private suspend fun containsMatchIn(contentMessage: ContentMessage<*>): Boolean {
         return when(val content = contentMessage.content) {
             is TextContent -> !hasCommand(content) && containsInText(content.text)
-            is PhotoContent -> containsInImage(content)
+            // is PhotoContent -> containsInImage(content)
             else -> false
         }
     }
