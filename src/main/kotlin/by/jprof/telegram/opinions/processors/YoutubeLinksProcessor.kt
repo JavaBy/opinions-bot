@@ -116,12 +116,13 @@ class YoutubeLinksProcessor(
                         "$description\n\n" +
                         "Views: $views / Likes: $likes / Dislikes: $dislikes".boldMarkdownV2() //trim indent have strange layout
                 val votes = getVotesByYoutubeId(videoId)
+                logger.debug("Sending video {}", votes.id)
                 bot.sendMessage(
                         chatId = update.data.chat.id,
                         text = videoText,
                         parseMode = MarkdownV2ParseMode,
                         replyToMessageId = update.data.messageId,
-                        replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, videoId))
+                        replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, votes.id))
                 )
             } else {
                 logger.debug("$channelId is not in a white list")
@@ -131,7 +132,6 @@ class YoutubeLinksProcessor(
 
     private suspend fun getVotesByYoutubeId(videoId: String, prefix: Boolean = true): Votes {
         val id = if (prefix) "YOUTUBE-$videoId" else videoId
-
         return votesDAO.get(id) ?: Votes(id)
     }
 
