@@ -21,6 +21,7 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.update.CallbackQueryUpda
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
 import com.github.insanusmokrassar.TelegramBotAPI.utils.extensions.escapeMarkdownV2Common
+import com.github.insanusmokrassar.TelegramBotAPI.utils.extensions.escapeMarkdownV2PreAndCode
 import com.google.api.services.youtube.YouTube
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
@@ -106,7 +107,7 @@ class YoutubeLinksProcessor(
         } else {
             snippet.description
         }
-        val description = rawDescription.escapeMarkdownV2Common()
+        val description = rawDescription.escapeMarkdownV2PreAndCode()
 
         runBlocking {
             logger.debug("checking if $channelId is in a white list")
@@ -114,7 +115,7 @@ class YoutubeLinksProcessor(
             if (youtubeDAO.isInWhiteList(channelId)) {
                 logger.debug("$channelId is in a white list")
                 val videoText = "Cast your vote for: ${snippet.title}\n\n".boldMarkdownV2() +
-                        "$description\n\n".italicMarkdownV2() +
+                        "$description\n\n"+
                         "Views: $views / Likes: $likes / Dislikes: $dislikes".boldMarkdownV2() //trim indent have strange layout
                 val votes = getVotesByYoutubeId(videoId)
                 logger.debug("Sending video {}", votes.id)
