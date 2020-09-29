@@ -36,6 +36,7 @@ class YoutubeLinksProcessor(
         private const val ACCEPTED_DISPLAY_LEN = 500
 
         // TODO: https://twitter.com/shipilev/status/934133677445042176 passes this regex!
+        @Suppress("RegExpRedundantEscape")
         private val youTubeLinkRegex = "^.*((youtu.be\\/)|(v\\/)|(\\/u\\/\\w\\/)|(embed\\/)|(watch\\?))\\??v?=?([^#\\&\\?]*).*".toRegex()
 
         internal val String.youTubeVideoId: String?
@@ -128,8 +129,8 @@ class YoutubeLinksProcessor(
         }
     }
 
-    private suspend fun getVotesByYoutubeId(videoId: String): Votes {
-        val id = "YOUTUBE-$videoId"
+    private suspend fun getVotesByYoutubeId(videoId: String, prefix: Boolean = true): Votes {
+        val id = if (prefix) "YOUTUBE-$videoId" else videoId
 
         return votesDAO.get(id) ?: Votes(id)
     }
@@ -143,7 +144,7 @@ class YoutubeLinksProcessor(
             val data = callbackQuery.data
             if (data.startsWith("YOUTUBE")) {
                 val (youtubeVideoId, vote) = data.split(":")
-                val votes = getVotesByYoutubeId(youtubeVideoId)
+                val votes = getVotesByYoutubeId(youtubeVideoId, prefix = false)
                 val fromUserId = callbackQuery.user.id.chatId.toString()
                 val updatedVotes = votes.copy(votes = votes.votes + (fromUserId to vote))
 
