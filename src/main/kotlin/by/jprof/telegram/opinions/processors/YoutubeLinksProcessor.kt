@@ -8,6 +8,7 @@ import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.answers.answerC
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.edit.ReplyMarkup.editMessageReplyMarkup
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.sendMessage
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.utils.formatting.boldMarkdownV2
+import com.github.insanusmokrassar.TelegramBotAPI.extensions.utils.formatting.italicMarkdownV2
 import com.github.insanusmokrassar.TelegramBotAPI.types.CallbackQuery.MessageDataCallbackQuery
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.TextLinkTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.URLTextSource
@@ -113,7 +114,7 @@ class YoutubeLinksProcessor(
             if (youtubeDAO.isInWhiteList(channelId)) {
                 logger.debug("$channelId is in a white list")
                 val videoText = "Cast your vote for: ${snippet.title}\n\n".boldMarkdownV2() +
-                        "$description\n\n" +
+                        "$description\n\n".italicMarkdownV2() +
                         "Views: $views / Likes: $likes / Dislikes: $dislikes".boldMarkdownV2() //trim indent have strange layout
                 val votes = getVotesByYoutubeId(videoId)
                 logger.debug("Sending video {}", votes.id)
