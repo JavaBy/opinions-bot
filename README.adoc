@@ -1,1 +1,3 @@
 = JProf community bot
+
+== We accept PRs for the Hacktoberfest 2020!
