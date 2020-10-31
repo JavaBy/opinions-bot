@@ -18,10 +18,12 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.TextCont
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.CallbackQueryUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
+import com.github.insanusmokrassar.TelegramBotAPI.utils.extensions.escapeMarkdownV2Common
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import org.apache.logging.log4j.LogManager
+import org.jsoup.Jsoup
 
 class JEPLinksProcessor(
         private val bot: RequestsExecutor,
@@ -90,11 +92,33 @@ class JEPLinksProcessor(
 
     private suspend fun replyToJEPMention(jep: String, message: Message) {
         logger.debug("Reply to JEP {} mention", jep)
+
+        val summary = try {
+            Jsoup
+                    .connect("https://openjdk.java.net/jeps/${jep}")
+                    ?.get()
+                    ?.select("#Summary + p")
+                    ?.first()
+                    ?.let {
+                        it.text()
+                    } ?: null
+        } catch (_: Exception) {
+            null
+        }
+
+        logger.debug("Summary: {}", summary)
+
+        val text = if(summary != null){
+            "${summary}\n\nCast your vote for *JEP $jep* now ⤵️".escapeMarkdownV2Common()
+        } else {
+            "Cast your vote for *JEP $jep* now ⤵️"
+        }
+
         val votesId = constructVotesID(jep)
         val votes = votesDAO.get(votesId) ?: Votes(votesId)
         bot.sendMessage(
                 chatId = message.chat.id,
-                text = "Cast your vote for *JEP $jep* now ⤵️",
+                text = text,
                 parseMode = MarkdownV2ParseMode,
                 replyToMessageId = message.messageId,
                 replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, votesId))
