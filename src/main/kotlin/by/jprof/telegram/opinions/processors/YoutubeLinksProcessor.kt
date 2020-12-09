@@ -115,7 +115,7 @@ class YoutubeLinksProcessor(
             if (youtubeDAO.isInWhiteList(channelId)) {
                 logger.debug("$channelId is in a white list")
                 val videoText = "Cast your vote for: ${snippet.title}\n\n".boldMarkdownV2() +
-                        "$description\n\n"+
+                        "```$description\n\n```"+
                         "Views: $views / Likes: $likes / Dislikes: $dislikes".boldMarkdownV2() //trim indent have strange layout
                 val votes = getVotesByYoutubeId(videoId)
                 logger.debug("Sending video {}", votes.id)
