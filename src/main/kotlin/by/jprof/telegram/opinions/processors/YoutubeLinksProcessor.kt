@@ -8,7 +8,7 @@ import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.answers.answerC
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.edit.ReplyMarkup.editMessageReplyMarkup
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.sendMessage
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.utils.formatting.boldMarkdownV2
-import com.github.insanusmokrassar.TelegramBotAPI.extensions.utils.formatting.italicMarkdownV2
+import com.github.insanusmokrassar.TelegramBotAPI.extensions.utils.formatting.codeMarkdownV2
 import com.github.insanusmokrassar.TelegramBotAPI.types.CallbackQuery.MessageDataCallbackQuery
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.TextLinkTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.URLTextSource
@@ -107,7 +107,7 @@ class YoutubeLinksProcessor(
         } else {
             snippet.description
         }
-        val description = rawDescription.escapeMarkdownV2PreAndCode()
+        val description = rawDescription.escapeMarkdownV2Common()
 
         runBlocking {
             logger.debug("checking if $channelId is in a white list")
