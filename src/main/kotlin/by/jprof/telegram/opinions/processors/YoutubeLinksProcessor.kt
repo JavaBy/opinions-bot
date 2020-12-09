@@ -8,7 +8,7 @@ import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.answers.answerC
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.edit.ReplyMarkup.editMessageReplyMarkup
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.sendMessage
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.utils.formatting.boldMarkdownV2
-import com.github.insanusmokrassar.TelegramBotAPI.extensions.utils.formatting.italicMarkdownV2
+import com.github.insanusmokrassar.TelegramBotAPI.extensions.utils.formatting.codeMarkdownV2
 import com.github.insanusmokrassar.TelegramBotAPI.types.CallbackQuery.MessageDataCallbackQuery
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.TextLinkTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.URLTextSource
@@ -96,6 +96,9 @@ class YoutubeLinksProcessor(
         logger.debug("Youtube video id is: $videoId")
 
         val response = youTube.videos().list("snippet,statistics").setId(videoId).execute()
+
+        logger.debug("YouTube response: {}", response)
+
         val videoDetails = response.items.first()
         val snippet = videoDetails.snippet
         val channelId = snippet.channelId
@@ -107,18 +110,18 @@ class YoutubeLinksProcessor(
         } else {
             snippet.description
         }
-        val description = rawDescription.escapeMarkdownV2PreAndCode()
+        val description = rawDescription.escapeMarkdownV2Common()
 
         runBlocking {
             logger.debug("checking if $channelId is in a white list")
 
             if (youtubeDAO.isInWhiteList(channelId)) {
                 logger.debug("$channelId is in a white list")
-                val videoText = "Cast your vote for: ${snippet.title}\n\n".boldMarkdownV2() +
-                        "$description\n\n"+
+                val videoText = "Cast your vote for: ${snippet.title}".boldMarkdownV2() +
+                        "\n\n```\n$description\n\n```" +
                         "Views: $views / Likes: $likes / Dislikes: $dislikes".boldMarkdownV2() //trim indent have strange layout
                 val votes = getVotesByYoutubeId(videoId)
-                logger.debug("Sending video {}", votes.id)
+                logger.debug("Sending text {} for video {}", videoText, votes.id)
                 bot.sendMessage(
                         chatId = update.data.chat.id,
                         text = videoText,
@@ -161,5 +164,4 @@ class YoutubeLinksProcessor(
             }
         }
     }
-
 }
