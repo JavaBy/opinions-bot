@@ -2,13 +2,15 @@ package by.jprof.telegram.opinions.entity
 
 import by.jprof.telegram.opinions.dao.toAttributeValue
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+import java.time.Instant
 
 const val DOWN_VOTE = "\uD83D\uDC4E"
 const val UP_VOTE = "\uD83D\uDC4D"
 
 data class Votes(
         val id: String,
-        val votes: Map<String, String> = emptyMap()
+        val votes: Map<String, String> = emptyMap(),
+        val lastRepostedAt: Instant? = null
 )
 
 fun Votes.toAttributeValues(): Map<String, AttributeValue> = mapOf(

@@ -8,7 +8,6 @@ import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.answers.answerC
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.edit.ReplyMarkup.editMessageReplyMarkup
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.sendMessage
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.utils.formatting.boldMarkdownV2
-import com.github.insanusmokrassar.TelegramBotAPI.extensions.utils.formatting.codeMarkdownV2
 import com.github.insanusmokrassar.TelegramBotAPI.types.CallbackQuery.MessageDataCallbackQuery
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.TextLinkTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.URLTextSource
@@ -21,10 +20,12 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.update.CallbackQueryUpda
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
 import com.github.insanusmokrassar.TelegramBotAPI.utils.extensions.escapeMarkdownV2Common
-import com.github.insanusmokrassar.TelegramBotAPI.utils.extensions.escapeMarkdownV2PreAndCode
 import com.google.api.services.youtube.YouTube
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
+import java.time.Duration
+import java.time.Instant
+import kotlin.random.Random
 
 
 class YoutubeLinksProcessor(
@@ -120,15 +121,28 @@ class YoutubeLinksProcessor(
                 val videoText = "Cast your vote for: ${snippet.title}".boldMarkdownV2() +
                         "\n\n```\n$description\n\n```" +
                         "Views: $views / Likes: $likes / Dislikes: $dislikes".boldMarkdownV2() //trim indent have strange layout
-                val votes = getVotesByYoutubeId(videoId)
-                logger.debug("Sending text {} for video {}", videoText, votes.id)
-                bot.sendMessage(
+                var votes = getVotesByYoutubeId(videoId)
+                var canRepost = false
+                if (null == votes.lastRepostedAt) {
+                    votes = votes.copy(lastRepostedAt = Instant.now())
+                    votesDAO.save(votes)
+                    canRepost = true
+                }
+                val timePassed = Duration.between(votes.lastRepostedAt, Instant.now())
+                val coolDown = Random.nextLong(
+                    Duration.ofMinutes(30).toMillis(), Duration.ofHours(1).toMillis()
+                )
+                canRepost = if (canRepost) canRepost else timePassed.toMillis() > coolDown
+                if (canRepost) {
+                    logger.debug("Sending text {} for video {}", videoText, votes.id)
+                    bot.sendMessage(
                         chatId = update.data.chat.id,
                         text = videoText,
                         parseMode = MarkdownV2ParseMode,
                         replyToMessageId = update.data.messageId,
                         replyMarkup = InlineKeyboardMarkup(keyboard = votingKeyBoard(votes, votes.id))
-                )
+                    )
+                }
             } else {
                 logger.debug("$channelId is not in a white list")
             }
