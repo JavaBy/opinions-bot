@@ -30,12 +30,6 @@ export class OpinionsStack extends cdk.Stack {
 			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
 		});
 
-		const layer = new lambda.LayerVersion(this, 'Opinions Layer', {
-			code: lambda.Code.fromAsset('../build/distributions/layer.zip'),
-			compatibleRuntimes: [lambda.Runtime.JAVA_11],
-			description: 'Heavy resources(tesseract, etc) to reduce bundle size',
-		});
-
 		const lambdaFunctionWebhook = new lambda.Function(this, 'opinions-webhook', {
 			functionName: 'opinions-webhook',
 			runtime: lambda.Runtime.JAVA_11,
@@ -53,7 +47,6 @@ export class OpinionsStack extends cdk.Stack {
 				'TABLE_KOTLIN_MENTIONS': kotlinMentionsTable.tableName,
 				'OPINIONS_LAYER_PATH': '/opt/java/lib',
 			},
-			layers: [layer]
 		});
 
 		votesTable.grantReadWriteData(lambdaFunctionWebhook);
