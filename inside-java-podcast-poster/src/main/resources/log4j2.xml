@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" packages="com.amazonaws.services.lambda.runtime.log4j2">
+	<Appenders>
+		<Lambda name="Lambda">
+			<JsonLayout>
+				<Complete>false</Complete>
+				<Compact>true</Compact>
+				<KeyValuePair key="AWSRequestId" value="$${ctx:AWSRequestId}"/>
+			</JsonLayout>
+		</Lambda>
+		<Console name="STDOUT" target="SYSTEM_OUT">
+			<PatternLayout>
+				<Pattern>
+					%d{ISO8601}{UTC} [%-5p] [%t] [%c{1.}]: %m%n
+				</Pattern>>
+			</PatternLayout>
+		</Console>
+		<Routing name="Router">
+			<Routes pattern="$${env:LOG_APPENDER:-Lambda}">
+				<Route ref="STDOUT" key="STDOUT"/>
+				<Route ref="Lambda" key="Lambda"/>
+			</Routes>
+		</Routing>
+	</Appenders>
+	<Loggers>
+		<Logger name="by.jprof.telegram.opinions" level="${env:LOG_THRESHOLD:-INFO}" additivity="false">
+			<AppenderRef ref="Router"/>
+		</Logger>
+		<Root level="${env:LOG_ROOT_THRESHOLD:-WARN}">
+			<AppenderRef ref="Router"/>
+		</Root>
+	</Loggers>
+</Configuration>
