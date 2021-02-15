@@ -1,0 +1,3 @@
+= Inside Java podcast poster
+
+This AWS Lambda posts new Inside Java podcast issues.

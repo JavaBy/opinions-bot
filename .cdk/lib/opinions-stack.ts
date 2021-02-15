@@ -4,75 +4,96 @@ import {OpinionsStackProps} from './OpinionsStackProps';
 import dynamodb = require('@aws-cdk/aws-dynamodb');
 import lambda = require('@aws-cdk/aws-lambda');
 import apigateway = require('@aws-cdk/aws-apigateway');
+import events = require('@aws-cdk/aws-events');
+import targets = require('@aws-cdk/aws-events-targets');
 
 export class OpinionsStack extends cdk.Stack {
-	constructor(scope: cdk.Construct, id: string, props: OpinionsStackProps) {
-		super(scope, id, props);
+    constructor(scope: cdk.Construct, id: string, props: OpinionsStackProps) {
+        super(scope, id, props);
 
-		const votesTable = new dynamodb.Table(this, 'opinions-votes', {
-			tableName: 'opinions-votes',
-			partitionKey: {name: 'id', type: dynamodb.AttributeType.STRING},
-			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-		});
-		const keyboardsTable = new dynamodb.Table(this, 'opinions-keyboards', {
-			tableName: 'opinions-keyboards',
-			partitionKey: {name: 'id', type: dynamodb.AttributeType.STRING},
-			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-		});
-		const youtubeChannelsWhitelistTable = new dynamodb.Table(this, 'opinions-youtube-channels-whitelist', {
-			tableName: 'opinions-youtube-channels-whitelist',
-			partitionKey: {name: 'channelId', type: dynamodb.AttributeType.STRING},
-			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-		});
-		const kotlinMentionsTable = new dynamodb.Table(this, 'opinions-kotlin-mentions', {
-			tableName: 'opinions-kotlin-mentions',
-			partitionKey: {name: 'chatId', type: dynamodb.AttributeType.STRING},
-			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-		});
+        const votesTable = new dynamodb.Table(this, 'opinions-votes', {
+            tableName: 'opinions-votes',
+            partitionKey: {name: 'id', type: dynamodb.AttributeType.STRING},
+            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+        });
+        const keyboardsTable = new dynamodb.Table(this, 'opinions-keyboards', {
+            tableName: 'opinions-keyboards',
+            partitionKey: {name: 'id', type: dynamodb.AttributeType.STRING},
+            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+        });
+        const youtubeChannelsWhitelistTable = new dynamodb.Table(this, 'opinions-youtube-channels-whitelist', {
+            tableName: 'opinions-youtube-channels-whitelist',
+            partitionKey: {name: 'channelId', type: dynamodb.AttributeType.STRING},
+            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+        });
+        const kotlinMentionsTable = new dynamodb.Table(this, 'opinions-kotlin-mentions', {
+            tableName: 'opinions-kotlin-mentions',
+            partitionKey: {name: 'chatId', type: dynamodb.AttributeType.STRING},
+            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+        });
+        const insideJavaTable = new dynamodb.Table(this, 'opinions-inside-java', {
+            tableName: 'opinions-inside-java',
+            partitionKey: {name: 'chatId', type: dynamodb.AttributeType.STRING},
+            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+        });
 
-		const layer = new lambda.LayerVersion(this, 'Opinions Layer', {
-			code: lambda.Code.fromAsset('../build/distributions/layer.zip'),
-			compatibleRuntimes: [lambda.Runtime.JAVA_11],
-			description: 'Heavy resources(tesseract, etc) to reduce bundle size',
-		});
+        const lambdaFunctionWebhook = new lambda.Function(this, 'opinions-webhook', {
+            functionName: 'opinions-webhook',
+            runtime: lambda.Runtime.JAVA_11,
+            timeout: Duration.seconds(30),
+            memorySize: 1024,
+            code: lambda.Code.fromAsset('../webhook/build/libs/opinions-bot-webhook-all.jar'),
+            handler: 'by.jprof.telegram.opinions.webhook.Handler',
+            environment: {
+                'LOG_THRESHOLD': 'DEBUG',
+                'TELEGRAM_BOT_TOKEN': props.telegramToken,
+                'YOUTUBE_API_TOKEN': props.youtubeToken,
+                'TABLE_VOTES': votesTable.tableName,
+                'TABLE_KEYBOARDS': keyboardsTable.tableName,
+                'TABLE_YOUTUBE_CHANNELS_WHITELIST': youtubeChannelsWhitelistTable.tableName,
+                'TABLE_KOTLIN_MENTIONS': kotlinMentionsTable.tableName,
+            },
+        });
 
-		const lambdaFunctionWebhook = new lambda.Function(this, 'opinions-webhook', {
-			functionName: 'opinions-webhook',
-			runtime: lambda.Runtime.JAVA_11,
-			timeout: Duration.seconds(30),
-			memorySize: 1024,
-			code: lambda.Code.fromAsset('../build/libs/opinions-bot-all.jar'),
-			handler: 'by.jprof.telegram.opinions.Handler',
-			environment: {
-				'LOG_THRESHOLD': 'DEBUG',
-				'TELEGRAM_BOT_TOKEN': props.telegramToken,
-				'YOUTUBE_API_TOKEN': props.youtubeToken,
-				'TABLE_VOTES': votesTable.tableName,
-				'TABLE_KEYBOARDS': keyboardsTable.tableName,
-				'TABLE_YOUTUBE_CHANNELS_WHITELIST': youtubeChannelsWhitelistTable.tableName,
-				'TABLE_KOTLIN_MENTIONS': kotlinMentionsTable.tableName,
-				'OPINIONS_LAYER_PATH': '/opt/java/lib',
-			},
-			layers: [layer]
-		});
+        const lambdaFunctionInsideJavaPodcastPoster = new lambda.Function(this, 'opinions-inside-java-podcast-poster', {
+            functionName: 'opinions-inside-java-podcast-poster',
+            runtime: lambda.Runtime.JAVA_11,
+            timeout: Duration.seconds(30),
+            memorySize: 1024,
+            code: lambda.Code.fromAsset('../inside-java-podcast-poster/build/libs/opinions-bot-inside-java-podcast-poster-all.jar'),
+            handler: 'by.jprof.telegram.opinions.insidejava.Handler',
+            environment: {
+                'LOG_THRESHOLD': 'DEBUG',
+                'TELEGRAM_BOT_TOKEN': props.telegramToken,
+                'TABLE_INSIDE_JAVA_PODCAST': insideJavaTable.tableName,
+            },
+        });
 
-		votesTable.grantReadWriteData(lambdaFunctionWebhook);
-		keyboardsTable.grantReadData(lambdaFunctionWebhook);
-		youtubeChannelsWhitelistTable.grantReadData(lambdaFunctionWebhook);
-		kotlinMentionsTable.grantReadWriteData(lambdaFunctionWebhook);
+        votesTable.grantReadWriteData(lambdaFunctionWebhook);
+        keyboardsTable.grantReadData(lambdaFunctionWebhook);
+        youtubeChannelsWhitelistTable.grantReadData(lambdaFunctionWebhook);
+        kotlinMentionsTable.grantReadWriteData(lambdaFunctionWebhook);
+        insideJavaTable.grantReadWriteData(lambdaFunctionInsideJavaPodcastPoster)
 
-		const api = new apigateway.RestApi(this, 'opinions-bot', {
-			restApiName: 'opinions-bot',
-			cloudWatchRole: false,
-			endpointTypes: [apigateway.EndpointType.REGIONAL],
-			deployOptions: {
-				loggingLevel: apigateway.MethodLoggingLevel.INFO,
-				dataTraceEnabled: true,
-				metricsEnabled: true,
-				tracingEnabled: true,
-			},
-		});
+        const api = new apigateway.RestApi(this, 'opinions-bot', {
+            restApiName: 'opinions-bot',
+            cloudWatchRole: false,
+            endpointTypes: [apigateway.EndpointType.REGIONAL],
+            deployOptions: {
+                loggingLevel: apigateway.MethodLoggingLevel.INFO,
+                dataTraceEnabled: true,
+                metricsEnabled: true,
+                tracingEnabled: true,
+            },
+        });
 
-		api.root.addResource(props.telegramToken.replace(':', '_')).addMethod('POST', new apigateway.LambdaIntegration(lambdaFunctionWebhook));
-	}
+        api.root.addResource(props.telegramToken.replace(':', '_')).addMethod('POST', new apigateway.LambdaIntegration(lambdaFunctionWebhook));
+
+        const rule = new events.Rule(this, 'opinions-inside-java-podcast-poster-rule', {
+            ruleName: 'opinions-inside-java-podcast-poster-rule',
+            schedule: events.Schedule.expression('cron(0 * ? * * *)')
+        })
+
+        rule.addTarget(new targets.LambdaFunction(lambdaFunctionInsideJavaPodcastPoster));
+    }
 }

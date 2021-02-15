@@ -1,0 +1,3 @@
+= Webhook module
+
+This AWS Lambda function handles Telegram Bot API webhooks.
