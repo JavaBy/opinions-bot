@@ -17,6 +17,7 @@ import com.github.insanusmokrassar.TelegramBotAPI.extensions.utils.formatting.bo
 import com.github.insanusmokrassar.TelegramBotAPI.requests.abstracts.FileId
 import com.github.insanusmokrassar.TelegramBotAPI.types.ChatId
 import com.github.insanusmokrassar.TelegramBotAPI.types.ParseMode.MarkdownV2ParseMode
+import com.github.insanusmokrassar.TelegramBotAPI.utils.extensions.escapeMarkdownV2Common
 import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
 import org.koin.core.KoinComponent
@@ -71,17 +72,18 @@ class Handler : RequestHandler<ScheduledEvent, Unit>, KoinComponent {
             newItems.forEach { item ->
                 val image = item.image
                 val title = item.title ?: "New Inside Java episode!"
+                val summary = item.summary
                 val linkedTitle = if (item.link != null) {
                     "[${title.boldMarkdownV2()}](${item.link})"
                 } else {
                     title
                 }
-                val text = linkedTitle
-                // + if (item.description != null) {
-                //     "\n\n```\n${item.description}\n\n```"
-                // } else {
-                //     ""
-                // }
+                val text = linkedTitle +
+                        if (summary != null) {
+                            "\n\n```\n${summary.escapeMarkdownV2Common()}\n\n```"
+                        } else {
+                            ""
+                        }
 
                 if (image != null) {
                     logger.info("Sending photo {} with caption {} to {}", image, text, state.chatId)
