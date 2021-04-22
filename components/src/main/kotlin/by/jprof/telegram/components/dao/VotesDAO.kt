@@ -1,14 +1,14 @@
-package by.jprof.telegram.opinions.webhook.dao
+package by.jprof.telegram.components.dao
 
-import by.jprof.telegram.opinions.webhook.entity.Votes
-import by.jprof.telegram.opinions.webhook.entity.toAttributeValues
-import by.jprof.telegram.opinions.webhook.entity.toVotes
+import by.jprof.telegram.components.entity.Votes
+import by.jprof.telegram.components.entity.toAttributeValues
+import by.jprof.telegram.components.entity.toVotes
 import kotlinx.coroutines.future.await
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 
 class VotesDAO(
-        private val dynamoDb: DynamoDbAsyncClient,
-        private val table: String
+    private val dynamoDb: DynamoDbAsyncClient,
+    private val table: String
 ) {
     suspend fun save(votes: Votes) {
         dynamoDb.putItem {

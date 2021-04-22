@@ -1,5 +1,6 @@
 package by.jprof.telegram.opinions.webhook.config
 
+import by.jprof.telegram.components.youtube.Voting
 import by.jprof.telegram.opinions.webhook.processors.CustomVotesProcessor
 import by.jprof.telegram.opinions.webhook.processors.JEPLinksProcessor
 import by.jprof.telegram.opinions.webhook.processors.KotlinMentionsProcessor
@@ -15,12 +16,16 @@ val pipelineModule = module {
         UpdateProcessingPipeline(getAll())
     }
 
+    single {
+        Voting(get(), get(), get(), get())
+    }
+
     single<UpdateProcessor>(named("JEPLinksProcessor")) {
         JEPLinksProcessor(get(), get())
     }
 
     single<UpdateProcessor>(named("YoutubeLinksProcessor")) {
-        YoutubeLinksProcessor(get(), get(), get(), get())
+        YoutubeLinksProcessor(get())
     }
 
     single<UpdateProcessor>(named("KotlinMentionsProcessor")) {

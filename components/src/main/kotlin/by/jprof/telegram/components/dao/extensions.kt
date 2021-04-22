@@ -1,4 +1,4 @@
-package by.jprof.telegram.opinions.webhook.dao
+package by.jprof.telegram.components.dao
 
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.CommonMessageImpl
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.TextContent

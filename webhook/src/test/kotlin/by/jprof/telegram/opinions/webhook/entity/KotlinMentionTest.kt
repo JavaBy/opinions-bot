@@ -1,6 +1,6 @@
 package by.jprof.telegram.opinions.webhook.entity
 
-import by.jprof.telegram.opinions.dao.toAttributeValue
+import by.jprof.telegram.opinions.webhook.dao.toAttributeValue
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail

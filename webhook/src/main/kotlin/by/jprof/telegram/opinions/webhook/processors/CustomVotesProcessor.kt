@@ -1,9 +1,9 @@
 package by.jprof.telegram.opinions.webhook.processors
 
+import by.jprof.telegram.components.dao.VotesDAO
+import by.jprof.telegram.components.entity.Votes
 import by.jprof.telegram.opinions.webhook.dao.KeyboardsDAO
-import by.jprof.telegram.opinions.webhook.dao.VotesDAO
 import by.jprof.telegram.opinions.webhook.entity.Button
-import by.jprof.telegram.opinions.webhook.entity.Votes
 import by.jprof.telegram.opinions.webhook.entity.toInlineKeyboardMarkup
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.answers.answerCallbackQuery

@@ -1,9 +1,9 @@
 package by.jprof.telegram.opinions.webhook.config
 
+import by.jprof.telegram.components.dao.VotesDAO
+import by.jprof.telegram.components.youtube.YoutubeDAO
 import by.jprof.telegram.opinions.webhook.dao.KeyboardsDAO
 import by.jprof.telegram.opinions.webhook.dao.KotlinMentionsDAO
-import by.jprof.telegram.opinions.webhook.dao.VotesDAO
-import by.jprof.telegram.opinions.webhook.dao.YoutubeDAO
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient

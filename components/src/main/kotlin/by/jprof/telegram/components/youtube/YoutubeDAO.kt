@@ -1,11 +1,12 @@
-package by.jprof.telegram.opinions.webhook.dao
+package by.jprof.telegram.components.youtube
 
+import by.jprof.telegram.components.dao.toAttributeValue
 import kotlinx.coroutines.future.await
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 
 class YoutubeDAO(
-        private val dynamoDB: DynamoDbAsyncClient,
-        private val whiteListTable: String
+    private val dynamoDB: DynamoDbAsyncClient,
+    private val whiteListTable: String
 ) {
     suspend fun isInWhiteList(channelId: String): Boolean {
         val item = dynamoDB.getItem {
@@ -16,4 +17,3 @@ class YoutubeDAO(
         return !item.isNullOrEmpty()
     }
 }
-
