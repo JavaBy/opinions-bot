@@ -1,6 +1,6 @@
 package by.jprof.telegram.opinions.webhook.processors
 
-import by.jprof.telegram.opinions.entity.MentionStats
+import by.jprof.telegram.opinions.webhook.entity.MentionStats
 import com.github.insanusmokrassar.TelegramBotAPI.types.ChatId
 import com.github.insanusmokrassar.TelegramBotAPI.types.CommonUser
 import com.github.insanusmokrassar.TelegramBotAPI.types.Username

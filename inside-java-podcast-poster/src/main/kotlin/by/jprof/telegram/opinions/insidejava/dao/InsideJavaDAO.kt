@@ -7,8 +7,8 @@ import kotlinx.coroutines.future.await
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 
 class InsideJavaDAO(
-        private val dynamoDb: DynamoDbAsyncClient,
-        private val table: String
+    private val dynamoDb: DynamoDbAsyncClient,
+    private val table: String
 ) {
     suspend fun list(): List<InsideJava> {
         return dynamoDb.scan {

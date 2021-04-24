@@ -14,13 +14,6 @@ val dynamoModule = module {
     }
 
     single {
-        VotesDAO(
-                get(),
-                get(named(TABLE_VOTES))
-        )
-    }
-
-    single {
         YoutubeDAO(
                 get(),
                 get(named(TABLE_YOUTUBE_CHANNELS_WHITELIST))

@@ -1,6 +1,6 @@
 package by.jprof.telegram.opinions.webhook.processors
 
-import by.jprof.telegram.opinions.webhook.dao.asText
+import by.jprof.telegram.components.dao.asText
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.BotCommandTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.fullEntitiesList
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update

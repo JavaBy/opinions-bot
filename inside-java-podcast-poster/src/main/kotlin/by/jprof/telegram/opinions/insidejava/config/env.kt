@@ -1,11 +1,11 @@
 package by.jprof.telegram.opinions.insidejava.config
 
+import by.jprof.telegram.opinions.news.config.TABLE_NEWS_QUEUE
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 const val RSS_URL = "RSS_URL"
 const val TABLE_INSIDE_JAVA_PODCAST = "TABLE_INSIDE_JAVA_PODCAST"
-const val TELEGRAM_BOT_TOKEN = "TELEGRAM_BOT_TOKEN"
 
 val envModule = module {
     single(named(RSS_URL)) {
@@ -13,8 +13,7 @@ val envModule = module {
     }
 
     listOf(
-            TABLE_INSIDE_JAVA_PODCAST,
-            TELEGRAM_BOT_TOKEN,
+        TABLE_INSIDE_JAVA_PODCAST
     ).forEach { variable ->
         single(named(variable)) {
             System.getenv(variable)!!

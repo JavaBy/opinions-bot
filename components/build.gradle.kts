@@ -8,7 +8,8 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
+    api(kotlin("stdlib"))
+    api("org.koin:koin-core:2.1.5")
     api("org.apache.logging.log4j:log4j-core")
     api(platform("org.apache.logging.log4j:log4j-bom:2.13.1"))
     api("org.apache.logging.log4j:log4j-slf4j-impl:2.13.3")

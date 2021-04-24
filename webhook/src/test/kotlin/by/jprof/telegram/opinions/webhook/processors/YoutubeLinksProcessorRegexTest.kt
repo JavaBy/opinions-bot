@@ -1,6 +1,6 @@
 package by.jprof.telegram.opinions.webhook.processors
 
-import by.jprof.telegram.opinions.processors.YoutubeLinksProcessor.Companion.youTubeVideoId
+import by.jprof.telegram.opinions.webhook.processors.YoutubeLinksProcessor.Companion.youTubeVideoId
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test

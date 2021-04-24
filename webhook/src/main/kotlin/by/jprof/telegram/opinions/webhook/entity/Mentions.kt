@@ -1,7 +1,7 @@
 package by.jprof.telegram.opinions.webhook.entity
 
-import by.jprof.telegram.opinions.webhook.dao.require
-import by.jprof.telegram.opinions.webhook.dao.toAttributeValue
+import by.jprof.telegram.components.dao.require
+import by.jprof.telegram.components.dao.toAttributeValue
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import java.time.Instant
 
