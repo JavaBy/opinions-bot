@@ -14,7 +14,7 @@ import java.net.URL
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-class RssCrawler(
+class PodcastCrawler(
     private val rssUrl: String,
     private val parser: ITunesParser,
     private val dao: InsideJavaDAO,
