@@ -1,4 +1,4 @@
-package by.jprof.telegram.opinions.insidejava
+package by.jprof.telegram.opinions.insidejava.podcast
 
 import by.jprof.telegram.opinions.insidejava.dao.InsideJavaDAO
 import by.jprof.telegram.opinions.news.entity.InsideJavaAttrs

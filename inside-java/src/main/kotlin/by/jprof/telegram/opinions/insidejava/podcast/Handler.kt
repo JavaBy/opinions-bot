@@ -1,4 +1,4 @@
-package by.jprof.telegram.opinions.insidejava
+package by.jprof.telegram.opinions.insidejava.podcast
 
 import by.jprof.telegram.components.config.componentsDynamoModule
 import by.jprof.telegram.components.config.componentsEnvModule

@@ -1,6 +1,6 @@
 package by.jprof.telegram.opinions.insidejava.config
 
-import by.jprof.telegram.opinions.insidejava.RssCrawler
+import by.jprof.telegram.opinions.insidejava.podcast.RssCrawler
 import by.jprof.telegram.opinions.insidejava.dao.InsideJavaDAO
 import org.koin.core.qualifier.named
 import org.koin.dsl.module

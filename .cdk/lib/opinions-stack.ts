@@ -57,21 +57,22 @@ export class OpinionsStack extends cdk.Stack {
                 'TABLE_VOTES': votesTable.tableName,
                 'TABLE_KEYBOARDS': keyboardsTable.tableName,
                 'TABLE_YOUTUBE_CHANNELS_WHITELIST': youtubeChannelsWhitelistTable.tableName,
-                'TABLE_KOTLIN_MENTIONS': kotlinMentionsTable.tableName,
+                'TABLE_KOTLIN_MENTIONS': kotlinMentionsTable.tableName
             },
         });
 
-        const lambdaFunctionInsideJavaPodcastPoster = new lambda.Function(this, 'opinions-inside-java-podcast-poster', {
-            functionName: 'opinions-inside-java-podcast-poster',
+        const lambdaFunctionInsideJava = new lambda.Function(this, 'opinions-inside-java', {
+            functionName: 'opinions-inside-java',
             runtime: lambda.Runtime.JAVA_11,
             timeout: Duration.seconds(30),
             memorySize: 1024,
-            code: lambda.Code.fromAsset('../inside-java-podcast-poster/build/libs/opinions-bot-inside-java-podcast-poster-all.jar'),
-            handler: 'by.jprof.telegram.opinions.insidejava.Handler',
+            code: lambda.Code.fromAsset('../inside-java/build/libs/opinions-bot-inside-java-all.jar'),
+            handler: 'by.jprof.telegram.opinions.insidejava.podcast.Handler',
             environment: {
                 'LOG_THRESHOLD': 'DEBUG',
                 'TELEGRAM_BOT_TOKEN': props.telegramToken,
                 'TABLE_INSIDE_JAVA_PODCAST': insideJavaTable.tableName,
+                'TABLE_NEWS_QUEUE': insideJavaTable.tableName,
             },
         });
 
@@ -79,7 +80,8 @@ export class OpinionsStack extends cdk.Stack {
         keyboardsTable.grantReadData(lambdaFunctionWebhook);
         youtubeChannelsWhitelistTable.grantReadData(lambdaFunctionWebhook);
         kotlinMentionsTable.grantReadWriteData(lambdaFunctionWebhook);
-        insideJavaTable.grantReadWriteData(lambdaFunctionInsideJavaPodcastPoster)
+        insideJavaTable.grantReadWriteData(lambdaFunctionInsideJava)
+        newsQueueJavaTable.grantReadWriteData(lambdaFunctionInsideJava)
 
         const api = new apigateway.RestApi(this, 'opinions-bot', {
             restApiName: 'opinions-bot',
@@ -95,11 +97,11 @@ export class OpinionsStack extends cdk.Stack {
 
         api.root.addResource(props.telegramToken.replace(':', '_')).addMethod('POST', new apigateway.LambdaIntegration(lambdaFunctionWebhook));
 
-        const rule = new events.Rule(this, 'opinions-inside-java-podcast-poster-rule', {
-            ruleName: 'opinions-inside-java-podcast-poster-rule',
+        const rule = new events.Rule(this, 'opinions-inside-java-rule', {
+            ruleName: 'opinions-inside-java',
             schedule: events.Schedule.expression('cron(0 * ? * * *)')
         })
 
-        rule.addTarget(new targets.LambdaFunction(lambdaFunctionInsideJavaPodcastPoster));
+        rule.addTarget(new targets.LambdaFunction(lambdaFunctionInsideJava));
     }
 }
