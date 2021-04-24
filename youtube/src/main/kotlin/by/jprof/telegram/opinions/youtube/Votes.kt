@@ -1,8 +1,10 @@
-package by.jprof.telegram.components.entity
+package by.jprof.telegram.opinions.youtube
 
 import by.jprof.telegram.components.dao.toAttributeValue
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import java.time.Instant
+import java.util.Collections.emptyMap
+
 
 const val DOWN_VOTE = "\uD83D\uDC4E"
 const val UP_VOTE = "\uD83D\uDC4D"

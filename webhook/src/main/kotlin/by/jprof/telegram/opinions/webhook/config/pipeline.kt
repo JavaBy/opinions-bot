@@ -1,6 +1,5 @@
 package by.jprof.telegram.opinions.webhook.config
 
-import by.jprof.telegram.components.youtube.YoutubeVoting
 import by.jprof.telegram.opinions.webhook.processors.CustomVotesProcessor
 import by.jprof.telegram.opinions.webhook.processors.JEPLinksProcessor
 import by.jprof.telegram.opinions.webhook.processors.KotlinMentionsProcessor
@@ -14,10 +13,6 @@ import org.koin.dsl.module
 val pipelineModule = module {
     single {
         UpdateProcessingPipeline(getAll())
-    }
-
-    single {
-        YoutubeVoting(get(), get(), get(), get())
     }
 
     single<UpdateProcessor>(named("JEPLinksProcessor")) {

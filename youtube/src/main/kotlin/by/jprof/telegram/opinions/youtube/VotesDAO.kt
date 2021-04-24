@@ -1,8 +1,6 @@
-package by.jprof.telegram.components.dao
+package by.jprof.telegram.opinions.youtube
 
-import by.jprof.telegram.components.entity.Votes
-import by.jprof.telegram.components.entity.toAttributeValues
-import by.jprof.telegram.components.entity.toVotes
+import by.jprof.telegram.components.dao.toAttributeValue
 import kotlinx.coroutines.future.await
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 

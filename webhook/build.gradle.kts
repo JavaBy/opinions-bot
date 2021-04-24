@@ -1,6 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
-
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
@@ -21,8 +18,7 @@ val intTestImplementation: Configuration by configurations.getting {
 configurations["intTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
 
 dependencies {
-    implementation(project(":components"))
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(project(":youtube"))
     implementation(platform("com.fasterxml.jackson:jackson-bom:2.10.3"))
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.amazonaws:aws-lambda-java-events:2.2.7")

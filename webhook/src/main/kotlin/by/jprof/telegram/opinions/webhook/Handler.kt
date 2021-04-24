@@ -7,6 +7,8 @@ import by.jprof.telegram.opinions.webhook.config.pipelineModule
 import by.jprof.telegram.opinions.webhook.config.telegramModule
 import by.jprof.telegram.opinions.webhook.config.youtubeModule
 import by.jprof.telegram.opinions.webhook.processors.UpdateProcessingPipeline
+import by.jprof.telegram.opinions.youtube.config.youtubeDynamoModule
+import by.jprof.telegram.opinions.youtube.config.youtubeEnvModule
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent
@@ -30,7 +32,16 @@ class Handler : RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyR
 
     init {
         startKoin {
-            modules(envModule, jsonModule, dynamoModule, youtubeModule, telegramModule, pipelineModule)
+            modules(
+                envModule,
+                youtubeEnvModule,
+                jsonModule,
+                dynamoModule,
+                youtubeDynamoModule,
+                youtubeModule,
+                telegramModule,
+                pipelineModule
+            )
         }
     }
 

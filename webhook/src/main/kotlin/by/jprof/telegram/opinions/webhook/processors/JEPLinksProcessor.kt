@@ -1,8 +1,8 @@
 package by.jprof.telegram.opinions.webhook.processors
 
-import by.jprof.telegram.components.dao.VotesDAO
-import by.jprof.telegram.components.entity.Votes
-import by.jprof.telegram.components.youtube.votingKeyBoard
+import by.jprof.telegram.opinions.youtube.Votes
+import by.jprof.telegram.opinions.youtube.VotesDAO
+import by.jprof.telegram.opinions.youtube.votingKeyBoard
 import com.github.insanusmokrassar.TelegramBotAPI.CommonAbstracts.justTextSources
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.answers.answerCallbackQuery
