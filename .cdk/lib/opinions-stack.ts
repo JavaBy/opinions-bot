@@ -67,7 +67,7 @@ export class OpinionsStack extends cdk.Stack {
             timeout: Duration.seconds(30),
             memorySize: 1024,
             code: lambda.Code.fromAsset('../inside-java/build/libs/opinions-bot-inside-java-all.jar'),
-            handler: 'by.jprof.telegram.opinions.insidejava.podcast.Handler',
+            handler: 'by.jprof.telegram.opinions.insidejava.Handler',
             environment: {
                 'LOG_THRESHOLD': 'DEBUG',
                 'TELEGRAM_BOT_TOKEN': props.telegramToken,
