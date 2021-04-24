@@ -1,6 +1,6 @@
 package by.jprof.telegram.opinions.webhook.processors
 
-import by.jprof.telegram.components.youtube.Voting
+import by.jprof.telegram.components.youtube.YoutubeVoting
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.TextLinkTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.URLTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.abstracts.ContentMessage
@@ -12,7 +12,7 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.update.abstracts.Update
 import org.apache.logging.log4j.LogManager
 
 class YoutubeLinksProcessor(
-    private val voting: Voting,
+    private val voting: YoutubeVoting,
 ) : UpdateProcessor {
     companion object {
         private val logger = LogManager.getLogger(YoutubeLinksProcessor::class.java)!!

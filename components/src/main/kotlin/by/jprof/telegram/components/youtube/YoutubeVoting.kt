@@ -21,14 +21,14 @@ import java.time.Duration
 import java.time.Instant
 import kotlin.random.Random
 
-class Voting(
+class YoutubeVoting(
     private val bot: RequestsExecutor,
     private val votesDAO: VotesDAO,
     private val youtubeDAO: YoutubeDAO,
     private val youTube: YouTube
 ) {
     companion object {
-        private val logger = LogManager.getLogger(Voting::class.java)!!
+        private val logger = LogManager.getLogger(YoutubeVoting::class.java)!!
 
         private const val ACCEPTED_DISPLAY_LEN = 500
     }
