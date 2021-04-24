@@ -1,5 +1,7 @@
 package by.jprof.telegram.opinions.webhook
 
+import by.jprof.telegram.opinions.voting.config.votingBeans
+import by.jprof.telegram.opinions.voting.config.votingEnvModule
 import by.jprof.telegram.opinions.webhook.config.dynamoModule
 import by.jprof.telegram.opinions.webhook.config.envModule
 import by.jprof.telegram.opinions.webhook.config.jsonModule
@@ -35,6 +37,8 @@ class Handler : RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyR
             modules(
                 envModule,
                 youtubeEnvModule,
+                votingEnvModule,
+                votingBeans,
                 jsonModule,
                 dynamoModule,
                 youtubeDynamoModule,

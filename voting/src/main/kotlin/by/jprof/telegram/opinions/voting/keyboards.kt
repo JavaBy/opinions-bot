@@ -1,4 +1,4 @@
-package by.jprof.telegram.opinions.youtube
+package by.jprof.telegram.opinions.voting
 
 import com.github.insanusmokrassar.TelegramBotAPI.types.buttons.InlineKeyboardButtons.CallbackDataInlineKeyboardButton
 

@@ -1,4 +1,4 @@
-package by.jprof.telegram.opinions.youtube
+package by.jprof.telegram.opinions.voting
 
 import by.jprof.telegram.components.dao.toAttributeValue
 import kotlinx.coroutines.future.await

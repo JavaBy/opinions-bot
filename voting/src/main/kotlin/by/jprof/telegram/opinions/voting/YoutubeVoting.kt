@@ -1,5 +1,6 @@
-package by.jprof.telegram.opinions.youtube
+package by.jprof.telegram.opinions.voting
 
+import by.jprof.telegram.opinions.youtube.YoutubeDAO
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.answers.answerCallbackQuery
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.edit.ReplyMarkup.editMessageReplyMarkup
