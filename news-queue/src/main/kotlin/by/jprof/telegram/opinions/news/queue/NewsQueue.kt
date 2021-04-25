@@ -46,30 +46,30 @@ class NewsQueue(
             it.tableName(table)
             it.expressionAttributeNames(
                 mapOf(
-                    "#kind" to "kind",
+                    "#event" to "event",
                     "#processed" to "processed",
                     "#businessKey" to "businessKey"
                 )
             )
             it.expressionAttributeValues(
                 mapOf(
-                    ":kind" to item.kind.name.toAttributeValue(),
+                    ":event" to item.event.name.toAttributeValue(),
                     ":processed" to AttributeValue.builder().bool(false).build(),
                     ":businessKey" to item.businessKey().toAttributeValue()
                 )
             )
-            it.keyConditionExpression("#kind = :kind")
+            it.keyConditionExpression("#event = :event")
             it.filterExpression("#businessKey = :businessKey")
         }?.await()?.hasItems()
     }
 
 
-    suspend fun <T : DynamoAttrs> news(kind: Kind): List<QueueItem<T>> {
+    suspend fun <T : DynamoAttrs> news(event: Event): List<QueueItem<T>> {
         return dynamoDb.query {
             it.tableName(table)
             it.expressionAttributeValues(
                 mapOf(
-                    ":kind" to kind.name.toAttributeValue(),
+                    ":event" to event.name.toAttributeValue(),
                     ":processed" to AttributeValue.builder().bool(false).build()
                 )
             )
@@ -78,22 +78,25 @@ class NewsQueue(
                     "#processed" to "processed"
                 )
             )
-            it.keyConditionExpression("kind = :kind")
+            it.keyConditionExpression("event = :event")
             it.filterExpression("#processed = :processed")
         }.await()?.items()?.map {
             QueueItem.deserialize(it) as QueueItem<T>
         } ?: emptyList()
     }
 
-    suspend fun <T : DynamoAttrs> findAll(kind: Kind): List<QueueItem<T>> {
+    suspend fun <T : DynamoAttrs> findAll(event: Event): List<QueueItem<T>> {
         return dynamoDb.query {
             it.tableName(table)
+            it.expressionAttributeNames(mapOf(
+                "#event" to "event"
+            ))
             it.expressionAttributeValues(
                 mapOf(
-                    ":kind" to kind.name.toAttributeValue(),
+                    ":event" to event.name.toAttributeValue(),
                 )
             )
-            it.keyConditionExpression("kind = :kind")
+            it.keyConditionExpression("#event = :event")
         }.await()?.items()?.map {
             QueueItem.deserialize(it) as QueueItem<T>
         } ?: emptyList()

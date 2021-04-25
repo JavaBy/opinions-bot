@@ -2,7 +2,7 @@ package by.jprof.telegram.opinions.insidejava.podcast
 
 import by.jprof.telegram.opinions.news.entity.InsideJavaPodcastAttrs
 import by.jprof.telegram.opinions.news.produce.Producer
-import by.jprof.telegram.opinions.news.queue.Kind
+import by.jprof.telegram.opinions.news.queue.Event
 import by.jprof.telegram.opinions.news.queue.NewsQueue
 import by.jprof.telegram.opinions.news.queue.QueueItem
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.utils.formatting.boldMarkdownV2
@@ -30,7 +30,7 @@ class PodcastCrawler(
     override suspend fun produce() {
         val rss = parser.parse(URL(rssUrl).readText())
         val podcasts: List<QueueItem<InsideJavaPodcastAttrs>> =
-            queue.findAll(Kind.INSIDE_JAVA_PODCAST)
+            queue.findAll(Event.INSIDE_JAVA_PODCAST)
         val guids = podcasts.map { it.payload.guid }
         rss.items?.filterNot {
             guids.contains(it.guid?.value ?: "")
@@ -57,7 +57,7 @@ class PodcastCrawler(
             }
 
             val queueItem = QueueItem(
-                kind = Kind.INSIDE_JAVA_PODCAST,
+                event = Event.INSIDE_JAVA_PODCAST,
                 payload = InsideJavaPodcastAttrs(
                     caption = text,
                     guid = guid,

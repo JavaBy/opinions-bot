@@ -9,7 +9,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import java.time.Instant
 
 data class QueueItem<T : DynamoAttrs>(
-    val kind: Kind,
+    val event: Event,
     val payload: T,
     val createdAt: Instant?,
     val processedAt: Instant? = null,
@@ -17,7 +17,7 @@ data class QueueItem<T : DynamoAttrs>(
     val processed: Boolean = false
 ) : DynamoAttrs {
     override fun serialize(): Map<String, AttributeValue> = mapOf(
-        "kind" to this.kind.name.toAttributeValue(),
+        "event" to this.event.name.toAttributeValue(),
         "payload" to this.payload.serialize().toAttributeValue(),
         "createdAt" to (this.createdAt ?: "").toString().toAttributeValue(),
         "processedAt" to (this.processedAt ?: "").toString().toAttributeValue(),
@@ -29,16 +29,16 @@ data class QueueItem<T : DynamoAttrs>(
     override fun businessKey(): Map<String, AttributeValue> = this.payload.businessKey()
 
     fun key(): Map<String, AttributeValue> = mapOf(
-        "kind" to this.kind.name.toAttributeValue(),
+        "event" to this.event.name.toAttributeValue(),
         "queuedAt" to queuedAt.toString().toAttributeValue()
     )
 
     companion object : DynamoEntity<QueueItem<DynamoAttrs>> {
         override fun deserialize(attrs: Map<String, AttributeValue>): QueueItem<DynamoAttrs> {
-            val kind = Kind.valueOf(attrs.require("kind").s())
-            if (kind == Kind.INSIDE_JAVA_PODCAST) {
+            val event = Event.valueOf(attrs.require("event").s())
+            if (event == Event.INSIDE_JAVA_PODCAST) {
                 return QueueItem(
-                    kind,
+                    event,
                     InsideJavaPodcastAttrs.deserialize(attrs.require("payload").m()),
                     (attrs.require("createdAt").s().ifEmpty { null })?.let { Instant.parse(it) },
                     (attrs.require("processedAt").s().ifEmpty { null })?.let { Instant.parse(it) },
@@ -46,11 +46,11 @@ data class QueueItem<T : DynamoAttrs>(
                     attrs.require("processed").bool()
                 )
             }
-            throw IllegalStateException("Unexpected queue item kind $kind. Attrs: $attrs")
+            throw IllegalStateException("Unexpected queue event $event. Attrs: $attrs")
         }
     }
 }
 
-enum class Kind {
+enum class Event {
     INSIDE_JAVA_PODCAST
 }

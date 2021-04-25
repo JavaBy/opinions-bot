@@ -4,11 +4,11 @@ import by.jprof.telegram.components.dao.require
 import by.jprof.telegram.components.dao.toAttributeValue
 import by.jprof.telegram.components.entity.DynamoAttrs
 import by.jprof.telegram.components.entity.DynamoEntity
-import by.jprof.telegram.opinions.news.queue.Kind
+import by.jprof.telegram.opinions.news.queue.Event
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 class ChatAttrs(
-    val event: Kind,
+    val event: Event,
     val chatId: String,
 ) : DynamoAttrs {
     override fun serialize(): Map<String, AttributeValue> = mapOf(
@@ -23,7 +23,7 @@ class ChatAttrs(
     companion object : DynamoEntity<ChatAttrs> {
         override fun deserialize(attrs: Map<String, AttributeValue>): ChatAttrs =
             ChatAttrs(
-                event = Kind.valueOf(attrs.require("event").s()),
+                event = Event.valueOf(attrs.require("event").s()),
                 chatId = attrs.require("chatId").s()
             )
     }

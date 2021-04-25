@@ -1,7 +1,7 @@
 package by.jprof.telegram.opinions.publication
 
 import by.jprof.telegram.opinions.news.entity.InsideJavaPodcastAttrs
-import by.jprof.telegram.opinions.news.queue.Kind
+import by.jprof.telegram.opinions.news.queue.Event
 import by.jprof.telegram.opinions.news.queue.NewsQueue
 import by.jprof.telegram.opinions.news.queue.QueueItem
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
@@ -22,8 +22,8 @@ class TelegramPublisher(
     }
 
     override suspend fun publish() {
-        val eligibleChats = chats.findAll(Kind.INSIDE_JAVA_PODCAST)
-        val news = queue.news<InsideJavaPodcastAttrs>(Kind.INSIDE_JAVA_PODCAST)
+        val eligibleChats = chats.findAll(Event.INSIDE_JAVA_PODCAST)
+        val news = queue.news<InsideJavaPodcastAttrs>(Event.INSIDE_JAVA_PODCAST)
         news.sortedByDescending { it.createdAt ?: it.queuedAt }.forEach { anews ->
             eligibleChats.forEach { chat ->
                 logger.info("Publisher {} to {}", anews, chat)

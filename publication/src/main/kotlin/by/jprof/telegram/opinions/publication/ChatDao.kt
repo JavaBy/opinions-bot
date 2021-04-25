@@ -1,7 +1,7 @@
 package by.jprof.telegram.opinions.publication
 
 import by.jprof.telegram.components.dao.toAttributeValue
-import by.jprof.telegram.opinions.news.queue.Kind
+import by.jprof.telegram.opinions.news.queue.Event
 import kotlinx.coroutines.future.await
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 
@@ -9,7 +9,7 @@ class ChatDao(
     private val dynamoDb: DynamoDbAsyncClient,
     private val table: String
 ) {
-    suspend fun findAll(event: Kind): List<ChatAttrs> {
+    suspend fun findAll(event: Event): List<ChatAttrs> {
         return dynamoDb.query {
             it.tableName(table)
             it.expressionAttributeNames(
