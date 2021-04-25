@@ -54,7 +54,6 @@ class TelegramPublisher(
         youtubeVoting.sendVoteForVideoMessage(chat.chatId.toLong().toChatId(), item.videoId)
     }
 
-
     private suspend fun announcePodcast(chat: ChatAttrs, item: InsideJavaPodcastAttrs) {
         if (item.fileId != null) {
             logger.info(
