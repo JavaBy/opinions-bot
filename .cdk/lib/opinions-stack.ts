@@ -61,8 +61,8 @@ export class OpinionsStack extends cdk.Stack {
             },
         });
 
-        const lambdaFunctionInsideJava = new lambda.Function(this, 'opinions-inside-java', {
-            functionName: 'opinions-inside-java',
+        const lambdaFunctionInsideJava = new lambda.Function(this, 'opinions-inside-java-lambda', {
+            functionName: 'opinions-inside-java-lambda',
             runtime: lambda.Runtime.JAVA_11,
             timeout: Duration.seconds(30),
             memorySize: 1024,
@@ -97,8 +97,8 @@ export class OpinionsStack extends cdk.Stack {
 
         api.root.addResource(props.telegramToken.replace(':', '_')).addMethod('POST', new apigateway.LambdaIntegration(lambdaFunctionWebhook));
 
-        const rule = new events.Rule(this, 'opinions-inside-java-rule1', {
-            ruleName: 'opinions-inside-java-rule1',
+        const rule = new events.Rule(this, 'opinions-inside-java-rule', {
+            ruleName: 'opinions-inside-java-rule',
             schedule: events.Schedule.expression('cron(0/5 * ? * * *)')
         })
 
