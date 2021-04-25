@@ -72,7 +72,7 @@ export class OpinionsStack extends cdk.Stack {
                 'LOG_THRESHOLD': 'DEBUG',
                 'TELEGRAM_BOT_TOKEN': props.telegramToken,
                 'TABLE_INSIDE_JAVA_PODCAST': insideJavaTable.tableName,
-                'TABLE_NEWS_QUEUE': insideJavaTable.tableName,
+                'TABLE_NEWS_QUEUE': newsQueueJavaTable.tableName,
             },
         });
 
@@ -97,9 +97,9 @@ export class OpinionsStack extends cdk.Stack {
 
         api.root.addResource(props.telegramToken.replace(':', '_')).addMethod('POST', new apigateway.LambdaIntegration(lambdaFunctionWebhook));
 
-        const rule = new events.Rule(this, 'opinions-inside-java-rule', {
-            ruleName: 'opinions-inside-java',
-            schedule: events.Schedule.expression('cron(0 * ? * * *)')
+        const rule = new events.Rule(this, 'opinions-inside-java-rule1', {
+            ruleName: 'opinions-inside-java-rule1',
+            schedule: events.Schedule.expression('cron(0/5 * ? * * *)')
         })
 
         rule.addTarget(new targets.LambdaFunction(lambdaFunctionInsideJava));
