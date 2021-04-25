@@ -5,7 +5,6 @@ import by.jprof.telegram.opinions.news.entity.InsideJavaNewscastAttrs
 import by.jprof.telegram.opinions.news.entity.InsideJavaPodcastAttrs
 import by.jprof.telegram.opinions.news.queue.Event
 import by.jprof.telegram.opinions.news.queue.NewsQueue
-import by.jprof.telegram.opinions.news.queue.QueueItem
 import by.jprof.telegram.opinions.youtube.YoutubeVoting
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.media.sendPhoto
@@ -27,13 +26,13 @@ class TelegramPublisher(
     }
 
     override suspend fun publish() {
-        publishFirstEvent(Event.INSIDE_JAVA_PODCAST, this::announcePodcast)
-                || publishFirstEvent(Event.INSIDE_JAVA_NEWSCAST, this::announceNewscast)
+        publishOneNews(Event.INSIDE_JAVA_PODCAST, this::announcePodcast)
+                || publishOneNews(Event.INSIDE_JAVA_NEWSCAST, this::announceNewscast)
     }
 
-    private suspend fun <T : DynamoAttrs> publishFirstEvent(
+    private suspend fun <T : DynamoAttrs> publishOneNews(
         event: Event,
-        poster: suspend (chat: ChatAttrs, QueueItem<T>) -> Unit
+        poster: suspend (ChatAttrs, T) -> Unit
     ): Boolean {
         val eligibleChats = chats.findAll(event)
         if (eligibleChats.isEmpty()) {
@@ -44,40 +43,40 @@ class TelegramPublisher(
             .any { anews ->
                 eligibleChats.forEach { chat ->
                     logger.info("Publish {} to {}", anews, chat)
-                    poster(chat, anews)
+                    poster(chat, anews.payload)
                 }
                 queue.markProcessed(anews)
                 return true
             }
     }
 
-    private suspend fun announceNewscast(chat: ChatAttrs, item: QueueItem<InsideJavaNewscastAttrs>) {
-        youtubeVoting.sendVoteForVideoMessage(item.payload.videoId, chat.chatId.toLong().toChatId())
+    private suspend fun announceNewscast(chat: ChatAttrs, item: InsideJavaNewscastAttrs) {
+        youtubeVoting.sendVoteForVideoMessage(item.videoId, chat.chatId.toLong().toChatId())
     }
 
 
-    private suspend fun announcePodcast(chat: ChatAttrs, item: QueueItem<InsideJavaPodcastAttrs>) {
-        if (item.payload.fileId != null) {
+    private suspend fun announcePodcast(chat: ChatAttrs, item: InsideJavaPodcastAttrs) {
+        if (item.fileId != null) {
             logger.info(
                 "Sending photo {} with caption {} to {}",
-                item.payload.fileId, item.payload.caption
+                item.fileId, item.caption
             )
 
             bot.sendPhoto(
                 chatId = ChatId(chat.chatId.toLong()),
-                fileId = FileId(item.payload.fileId!!),
-                caption = item.payload.caption,
+                fileId = FileId(item.fileId!!),
+                caption = item.caption,
                 parseMode = MarkdownV2ParseMode,
             )
         } else {
             logger.info(
                 "Sending text {} to {}",
-                item.payload.caption, chat.chatId
+                item.caption, chat.chatId
             )
 
             bot.sendMessage(
                 chatId = ChatId(chat.chatId.toLong()),
-                text = item.payload.caption,
+                text = item.caption,
                 parseMode = MarkdownV2ParseMode,
             )
         }
