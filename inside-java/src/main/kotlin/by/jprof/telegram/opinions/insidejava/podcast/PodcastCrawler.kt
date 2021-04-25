@@ -71,7 +71,7 @@ class PodcastCrawler(
                 val guid = item.guid?.value ?: run {
                     logger.warn("Item {} doesn't have a GUID!. Infer GUID from text {}", item, text)
                     Base64.getEncoder().encode(text.encodeToByteArray())
-                        .toString(StandardCharsets.UTF_8).take(16)
+                        .toString(StandardCharsets.UTF_8).take(32)
                 }
 
                 val queueItem = QueueItem(
