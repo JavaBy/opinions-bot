@@ -37,6 +37,12 @@ export class OpinionsStack extends cdk.Stack {
             sortKey: {name: 'queuedAt', type: dynamodb.AttributeType.STRING},
             billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
         });
+        const chatsJavaTable = new dynamodb.Table(this, 'chats', {
+            tableName: 'chats',
+            partitionKey: {name: 'event', type: dynamodb.AttributeType.STRING},
+            sortKey: {name: 'chatId', type: dynamodb.AttributeType.STRING},
+            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+        });
 
         const lambdaFunctionWebhook = new lambda.Function(this, 'opinions-webhook', {
             functionName: 'opinions-webhook',
@@ -66,7 +72,9 @@ export class OpinionsStack extends cdk.Stack {
             environment: {
                 'LOG_THRESHOLD': 'DEBUG',
                 'TELEGRAM_BOT_TOKEN': props.telegramToken,
+                'YOUTUBE_API_TOKEN': props.youtubeToken,
                 'TABLE_NEWS_QUEUE': newsQueueJavaTable.tableName,
+                'TABLE_CHATS': chatsJavaTable.tableName,
             },
         });
 
@@ -75,6 +83,7 @@ export class OpinionsStack extends cdk.Stack {
         youtubeChannelsWhitelistTable.grantReadData(lambdaFunctionWebhook);
         kotlinMentionsTable.grantReadWriteData(lambdaFunctionWebhook);
         newsQueueJavaTable.grantReadWriteData(lambdaFunctionInsideJava)
+        chatsJavaTable.grantReadWriteData(lambdaFunctionInsideJava)
 
         const api = new apigateway.RestApi(this, 'opinions-bot', {
             restApiName: 'opinions-bot',
