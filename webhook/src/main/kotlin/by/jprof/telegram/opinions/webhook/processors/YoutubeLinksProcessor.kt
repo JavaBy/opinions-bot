@@ -47,7 +47,7 @@ class YoutubeLinksProcessor(
         logger.debug("Found YouTube videos: $videoIds")
 
         videoIds?.forEach { link ->
-            voting.sendVoteForVideoMessage(link, update.data.chat.id, update.data.messageId)
+            voting.sendVoteForVideoMessage(update.data.chat.id, link, update.data.messageId)
         }
     }
 

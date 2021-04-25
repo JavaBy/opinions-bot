@@ -34,7 +34,7 @@ class YoutubeVoting(
         private const val ACCEPTED_DISPLAY_LEN = 500
     }
 
-    suspend fun sendVoteForVideoMessage(videoId: String, chatId: ChatId, messageId: MessageIdentifier? = null) {
+    suspend fun sendVoteForVideoMessage(chatId: ChatId, videoId: String, messageId: MessageIdentifier? = null) {
         logger.debug("Youtube video id is: $videoId")
 
         val response = youTube.videos().list("snippet,statistics").setId(videoId).execute()

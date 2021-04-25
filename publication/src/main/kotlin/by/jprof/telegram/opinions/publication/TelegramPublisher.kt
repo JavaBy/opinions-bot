@@ -51,7 +51,7 @@ class TelegramPublisher(
     }
 
     private suspend fun announceNewscast(chat: ChatAttrs, item: InsideJavaNewscastAttrs) {
-        youtubeVoting.sendVoteForVideoMessage(item.videoId, chat.chatId.toLong().toChatId())
+        youtubeVoting.sendVoteForVideoMessage(chat.chatId.toLong().toChatId(), item.videoId)
     }
 
 
