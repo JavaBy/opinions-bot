@@ -4,7 +4,7 @@ import by.jprof.telegram.components.dao.require
 import by.jprof.telegram.components.dao.toAttributeValue
 import by.jprof.telegram.components.entity.DynamoAttrs
 import by.jprof.telegram.components.entity.DynamoEntity
-import by.jprof.telegram.opinions.news.entity.InsideJavaAttrs
+import by.jprof.telegram.opinions.news.entity.InsideJavaPodcastAttrs
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import java.time.Instant
 
@@ -39,7 +39,7 @@ data class QueueItem<T : DynamoAttrs>(
             if (kind == Kind.INSIDE_JAVA_PODCAST) {
                 return QueueItem(
                     kind,
-                    InsideJavaAttrs.deserialize(attrs.require("payload").m()),
+                    InsideJavaPodcastAttrs.deserialize(attrs.require("payload").m()),
                     (attrs.require("createdAt").s().ifEmpty { null })?.let { Instant.parse(it) },
                     (attrs.require("processedAt").s().ifEmpty { null })?.let { Instant.parse(it) },
                     Instant.parse(attrs.require("queuedAt").s()),

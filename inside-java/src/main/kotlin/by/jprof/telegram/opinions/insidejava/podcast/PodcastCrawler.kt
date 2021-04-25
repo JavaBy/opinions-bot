@@ -1,7 +1,6 @@
 package by.jprof.telegram.opinions.insidejava.podcast
 
-import by.jprof.telegram.opinions.insidejava.dao.InsideJavaDAO
-import by.jprof.telegram.opinions.news.entity.InsideJavaAttrs
+import by.jprof.telegram.opinions.news.entity.InsideJavaPodcastAttrs
 import by.jprof.telegram.opinions.news.produce.Producer
 import by.jprof.telegram.opinions.news.queue.Kind
 import by.jprof.telegram.opinions.news.queue.NewsQueue
@@ -19,7 +18,6 @@ import java.util.*
 class PodcastCrawler(
     private val rssUrl: String,
     private val parser: ITunesParser,
-    private val dao: InsideJavaDAO,
     private val queue: NewsQueue
 ) : Producer {
     companion object {
@@ -31,73 +29,49 @@ class PodcastCrawler(
 
     override suspend fun produce() {
         val rss = parser.parse(URL(rssUrl).readText())
-        val states = dao.list()
-
-        states.forEach { state ->
-            logger.info("Processing state for {}", state.chatId)
-
-            val newItems = (rss.items ?: emptyList()).filter { item ->
-                val guid = item.guid
-
-                if (guid == null) {
-                    logger.warn("Item {} doesn't have a GUID!", item)
-                }
-
-                (guid != null && !state.guids.contains(guid.value)).also {
-                    if (!it) {
-                        logger.debug("Filtered {}", item.guid?.value)
+        val podcasts: List<QueueItem<InsideJavaPodcastAttrs>> =
+            queue.findAll(Kind.INSIDE_JAVA_PODCAST)
+        val guids = podcasts.map { it.payload.guid }
+        rss.items?.filterNot {
+            guids.contains(it.guid?.value ?: "")
+        }?.forEach { item ->
+            val image = item.image
+            val title = item.title ?: "New Inside Java episode!"
+            val summary = item.summary
+            val linkedTitle = if (item.link != null) {
+                "[${title.boldMarkdownV2()}](${item.link})"
+            } else {
+                title
+            }
+            val text = linkedTitle +
+                    if (summary != null) {
+                        "\n\n```\n${summary.escapeMarkdownV2Common()}\n\n```"
+                    } else {
+                        ""
                     }
-                }
+
+            val guid = item.guid?.value ?: run {
+                logger.warn("Item {} doesn't have a GUID!. Infer GUID from text {}", item, text)
+                Base64.getEncoder().encode(text.encodeToByteArray())
+                    .toString(StandardCharsets.UTF_8).take(32)
             }
 
-            logger.info("New items for {}: {}", state.chatId, newItems.map { it.guid?.value })
-
-            newItems.forEach { item ->
-                val image = item.image
-                val title = item.title ?: "New Inside Java episode!"
-                val summary = item.summary
-                val linkedTitle = if (item.link != null) {
-                    "[${title.boldMarkdownV2()}](${item.link})"
-                } else {
-                    title
+            val queueItem = QueueItem(
+                kind = Kind.INSIDE_JAVA_PODCAST,
+                payload = InsideJavaPodcastAttrs(
+                    caption = text,
+                    guid = guid,
+                    fileId = image
+                ),
+                createdAt = item.pubDate?.let {
+                    ZonedDateTime.parse(
+                        it, pubDatePattern
+                    ).toInstant()
                 }
-                val text = linkedTitle +
-                        if (summary != null) {
-                            "\n\n```\n${summary.escapeMarkdownV2Common()}\n\n```"
-                        } else {
-                            ""
-                        }
-
-                val guid = item.guid?.value ?: run {
-                    logger.warn("Item {} doesn't have a GUID!. Infer GUID from text {}", item, text)
-                    Base64.getEncoder().encode(text.encodeToByteArray())
-                        .toString(StandardCharsets.UTF_8).take(32)
-                }
-
-                val queueItem = QueueItem(
-                    kind = Kind.INSIDE_JAVA_PODCAST,
-                    payload = InsideJavaAttrs(
-                        chatId = state.chatId.toString(),
-                        caption = text,
-                        guid = guid,
-                        fileId = image
-                    ),
-                    createdAt = item.pubDate?.let {
-                        ZonedDateTime.parse(
-                            it, pubDatePattern
-                        ).toInstant()
-                    }
-                )
-                queue.push(queueItem)
-
-                logger.info("Queued item {}", queueItem)
-            }
-
-            val newState = state.copy(
-                guids = state.guids + newItems.mapNotNull { it.guid?.value }
             )
+            queue.push(queueItem)
 
-            dao.save(newState)
+            logger.info("Queued item {}", queueItem)
         }
     }
 }

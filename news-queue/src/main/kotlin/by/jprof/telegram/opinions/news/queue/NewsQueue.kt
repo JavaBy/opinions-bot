@@ -41,8 +41,30 @@ class NewsQueue(
         }.await()
     }
 
+    suspend fun isProcessed(item: QueueItem<*>): Boolean? {
+        return dynamoDb.query {
+            it.tableName(table)
+            it.expressionAttributeNames(
+                mapOf(
+                    "#kind" to "kind",
+                    "#processed" to "processed",
+                    "#businessKey" to "businessKey"
+                )
+            )
+            it.expressionAttributeValues(
+                mapOf(
+                    ":kind" to item.kind.name.toAttributeValue(),
+                    ":processed" to AttributeValue.builder().bool(false).build(),
+                    ":businessKey" to item.businessKey().toAttributeValue()
+                )
+            )
+            it.keyConditionExpression("#kind = :kind")
+            it.filterExpression("#businessKey = :businessKey")
+        }?.await()?.hasItems()
+    }
 
-    suspend fun news(kind: Kind): List<QueueItem<DynamoAttrs>> {
+
+    suspend fun <T : DynamoAttrs> news(kind: Kind): List<QueueItem<T>> {
         return dynamoDb.query {
             it.tableName(table)
             it.expressionAttributeValues(
@@ -58,7 +80,22 @@ class NewsQueue(
             )
             it.keyConditionExpression("kind = :kind")
             it.filterExpression("#processed = :processed")
-        }.await()?.items()?.map { QueueItem.deserialize(it) }
-            ?: emptyList()
+        }.await()?.items()?.map {
+            QueueItem.deserialize(it) as QueueItem<T>
+        } ?: emptyList()
+    }
+
+    suspend fun <T : DynamoAttrs> findAll(kind: Kind): List<QueueItem<T>> {
+        return dynamoDb.query {
+            it.tableName(table)
+            it.expressionAttributeValues(
+                mapOf(
+                    ":kind" to kind.name.toAttributeValue(),
+                )
+            )
+            it.keyConditionExpression("kind = :kind")
+        }.await()?.items()?.map {
+            QueueItem.deserialize(it) as QueueItem<T>
+        } ?: emptyList()
     }
 }

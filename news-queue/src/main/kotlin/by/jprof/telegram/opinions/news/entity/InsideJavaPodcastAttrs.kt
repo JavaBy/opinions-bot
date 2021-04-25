@@ -6,15 +6,13 @@ import by.jprof.telegram.components.entity.DynamoAttrs
 import by.jprof.telegram.components.entity.DynamoEntity
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
-data class InsideJavaAttrs(
-    val chatId: String,
+data class InsideJavaPodcastAttrs(
     val caption: String,
     val guid: String,
     val fileId: String? = null,
 ) : DynamoAttrs {
     override fun serialize(): Map<String, AttributeValue> {
         return mapOf(
-            "chatId" to this.chatId.toAttributeValue(),
             "caption" to this.caption.toAttributeValue(),
             "guid" to this.guid.toAttributeValue(),
             "fileId" to (this.fileId ?: "").toAttributeValue()
@@ -25,10 +23,9 @@ data class InsideJavaAttrs(
         "guid" to this.guid.toAttributeValue()
     )
 
-    companion object : DynamoEntity<InsideJavaAttrs> {
-        override fun deserialize(attrs: Map<String, AttributeValue>): InsideJavaAttrs =
-            InsideJavaAttrs(
-                attrs.require("chatId").s(),
+    companion object : DynamoEntity<InsideJavaPodcastAttrs> {
+        override fun deserialize(attrs: Map<String, AttributeValue>): InsideJavaPodcastAttrs =
+            InsideJavaPodcastAttrs(
                 attrs.require("caption").s(),
                 attrs.require("guid").s(),
                 attrs["fileId"]?.s()

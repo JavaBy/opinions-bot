@@ -31,11 +31,6 @@ export class OpinionsStack extends cdk.Stack {
             partitionKey: {name: 'chatId', type: dynamodb.AttributeType.STRING},
             billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
         });
-        const insideJavaTable = new dynamodb.Table(this, 'opinions-inside-java', {
-            tableName: 'opinions-inside-java',
-            partitionKey: {name: 'chatId', type: dynamodb.AttributeType.STRING},
-            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-        });
         const newsQueueJavaTable = new dynamodb.Table(this, 'news-queue', {
             tableName: 'news-queue',
             partitionKey: {name: 'kind', type: dynamodb.AttributeType.STRING},
@@ -71,7 +66,6 @@ export class OpinionsStack extends cdk.Stack {
             environment: {
                 'LOG_THRESHOLD': 'DEBUG',
                 'TELEGRAM_BOT_TOKEN': props.telegramToken,
-                'TABLE_INSIDE_JAVA_PODCAST': insideJavaTable.tableName,
                 'TABLE_NEWS_QUEUE': newsQueueJavaTable.tableName,
             },
         });
@@ -80,7 +74,6 @@ export class OpinionsStack extends cdk.Stack {
         keyboardsTable.grantReadData(lambdaFunctionWebhook);
         youtubeChannelsWhitelistTable.grantReadData(lambdaFunctionWebhook);
         kotlinMentionsTable.grantReadWriteData(lambdaFunctionWebhook);
-        insideJavaTable.grantReadWriteData(lambdaFunctionInsideJava)
         newsQueueJavaTable.grantReadWriteData(lambdaFunctionInsideJava)
 
         const api = new apigateway.RestApi(this, 'opinions-bot', {
