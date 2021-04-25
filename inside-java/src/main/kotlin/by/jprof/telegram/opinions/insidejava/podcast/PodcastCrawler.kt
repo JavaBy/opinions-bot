@@ -93,9 +93,6 @@ class PodcastCrawler(
                 logger.info("Queued item {}", queueItem)
             }
 
-            val news = queue.news(Kind.INSIDE_JAVA_PODCAST)
-            queue.markProcessed(news[0])
-
             val newState = state.copy(
                 guids = state.guids + newItems.mapNotNull { it.guid?.value }
             )
