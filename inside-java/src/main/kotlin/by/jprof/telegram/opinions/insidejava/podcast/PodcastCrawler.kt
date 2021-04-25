@@ -11,8 +11,10 @@ import com.github.insanusmokrassar.TelegramBotAPI.utils.extensions.escapeMarkdow
 import org.apache.logging.log4j.LogManager
 import tw.ktrssreader.kotlin.parser.ITunesParser
 import java.net.URL
+import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 class PodcastCrawler(
     private val rssUrl: String,
@@ -66,23 +68,27 @@ class PodcastCrawler(
                             ""
                         }
 
-                val queueItem = InsideJavaAttrs(
-                    chatId = state.chatId.toString(),
-                    caption = text,
-                    fileId = image
-                )
+                val guid = item.guid?.value ?: run {
+                    logger.warn("Item {} doesn't have a GUID!. Infer GUID from text {}", item, text)
+                    Base64.getEncoder().encode(text.encodeToByteArray())
+                        .toString(StandardCharsets.UTF_8).take(16)
+                }
 
-                queue.push(
-                    QueueItem(
-                        Kind.INSIDE_JAVA_PODCAST,
-                        queueItem,
-                        item.pubDate?.let {
-                            ZonedDateTime.parse(
-                                it, pubDatePattern
-                            ).toInstant()
-                        }
-                    )
+                val queueItem = QueueItem(
+                    kind = Kind.INSIDE_JAVA_PODCAST,
+                    payload = InsideJavaAttrs(
+                        chatId = state.chatId.toString(),
+                        caption = text,
+                        guid = guid,
+                        fileId = image
+                    ),
+                    createdAt = item.pubDate?.let {
+                        ZonedDateTime.parse(
+                            it, pubDatePattern
+                        ).toInstant()
+                    }
                 )
+                queue.push(queueItem)
 
                 logger.info("Queued item {}", queueItem)
             }

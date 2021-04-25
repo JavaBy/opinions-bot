@@ -5,6 +5,7 @@ import by.jprof.telegram.components.entity.DynamoAttrs
 import kotlinx.coroutines.future.await
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+import java.time.Instant
 
 class NewsQueue(
     private val dynamoDb: DynamoDbAsyncClient,
@@ -22,16 +23,18 @@ class NewsQueue(
             it.tableName(table)
             it.expressionAttributeNames(
                 mapOf(
-                    "#processed" to "processed"
+                    "#processed" to "processed",
+                    "#processedAt" to "processedAt"
                 )
             )
             it.expressionAttributeValues(
                 mapOf(
-                    ":processed" to AttributeValue.builder().bool(true).build()
+                    ":processed" to AttributeValue.builder().bool(true).build(),
+                    ":processedAt" to AttributeValue.builder().s(Instant.now().toString()).build()
                 )
             )
             it.key(item.key())
-            it.updateExpression("SET #processed = :processed")
+            it.updateExpression("SET #processed = :processed, #processedAt = :processedAt")
         }.await()
     }
 

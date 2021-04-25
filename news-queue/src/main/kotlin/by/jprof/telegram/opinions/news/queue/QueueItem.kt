@@ -12,6 +12,7 @@ data class QueueItem<T : DynamoAttrs>(
     val kind: Kind,
     val payload: T,
     val createdAt: Instant?,
+    val processedAt: Instant? = null,
     val queuedAt: Instant = Instant.now(),
     val processed: Boolean = false
 ) : DynamoAttrs {
@@ -19,9 +20,13 @@ data class QueueItem<T : DynamoAttrs>(
         "kind" to this.kind.name.toAttributeValue(),
         "payload" to this.payload.serialize().toAttributeValue(),
         "createdAt" to (this.createdAt ?: "").toString().toAttributeValue(),
+        "processedAt" to (this.processedAt ?: "").toString().toAttributeValue(),
         "queuedAt" to queuedAt.toString().toAttributeValue(),
-        "processed" to AttributeValue.builder().bool(this.processed).build()
+        "processed" to AttributeValue.builder().bool(this.processed).build(),
+        "businessKey" to this.payload.businessKey().toAttributeValue()
     )
+
+    override fun businessKey(): Map<String, AttributeValue> = this.payload.businessKey()
 
     fun key(): Map<String, AttributeValue> = mapOf(
         "kind" to this.kind.name.toAttributeValue(),
@@ -36,6 +41,7 @@ data class QueueItem<T : DynamoAttrs>(
                     kind,
                     InsideJavaAttrs.deserialize(attrs.require("payload").m()),
                     (attrs.require("createdAt").s().ifEmpty { null })?.let { Instant.parse(it) },
+                    (attrs.require("processedAt").s().ifEmpty { null })?.let { Instant.parse(it) },
                     Instant.parse(attrs.require("queuedAt").s()),
                     attrs.require("processed").bool()
                 )

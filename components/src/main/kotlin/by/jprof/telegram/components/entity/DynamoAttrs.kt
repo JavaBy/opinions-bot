@@ -4,4 +4,6 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 interface DynamoAttrs {
     fun serialize(): Map<String, AttributeValue>
+
+    fun businessKey(): Map<String, AttributeValue>
 }
