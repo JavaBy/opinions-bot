@@ -24,16 +24,19 @@ class NewsQueue(
             it.expressionAttributeNames(
                 mapOf(
                     "#processed" to "processed",
-                    "#processedAt" to "processedAt"
+                    "#processedAt" to "processedAt",
+                    "#businessKey" to "businessKey"
                 )
             )
             it.expressionAttributeValues(
                 mapOf(
                     ":processed" to AttributeValue.builder().bool(true).build(),
-                    ":processedAt" to AttributeValue.builder().s(Instant.now().toString()).build()
+                    ":processedAt" to AttributeValue.builder().s(Instant.now().toString()).build(),
+                    ":businessKey" to item.businessKey().toAttributeValue()
                 )
             )
             it.key(item.key())
+            it.conditionExpression("#businessKey = :businessKey")
             it.updateExpression("SET #processed = :processed, #processedAt = :processedAt")
         }.await()
     }
