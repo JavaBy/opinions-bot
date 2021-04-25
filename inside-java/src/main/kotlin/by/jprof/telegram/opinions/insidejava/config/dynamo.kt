@@ -8,14 +8,14 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val dynamoModule = module {
-    single {
+    single<Producer> {
         PodcastCrawler(
             get(named(RSS_URL)),
             get(),
             get(),
             get()
         )
-    } bind Producer::class
+    }
 
     single {
         InsideJavaDAO(

@@ -1,6 +1,5 @@
-package by.jprof.telegram.opinions.webhook.config
+package by.jprof.telegram.opinions.youtube.config
 
-import by.jprof.telegram.opinions.youtube.config.YOUTUBE_API_TOKEN
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube

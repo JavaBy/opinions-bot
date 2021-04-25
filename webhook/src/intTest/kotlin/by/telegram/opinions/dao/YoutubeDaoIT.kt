@@ -3,7 +3,7 @@ package by.telegram.opinions.dao
 import by.dev.madhead.aws_junit5.common.AWSClient
 import by.dev.madhead.aws_junit5.common.AWSEndpoint
 import by.dev.madhead.aws_junit5.dynamo.v2.DynamoDB
-import by.jprof.telegram.opinions.dao.YoutubeDAO
+import by.jprof.telegram.opinions.youtube.YoutubeDAO
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue

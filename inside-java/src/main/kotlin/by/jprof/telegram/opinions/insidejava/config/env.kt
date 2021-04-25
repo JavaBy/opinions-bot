@@ -1,6 +1,5 @@
 package by.jprof.telegram.opinions.insidejava.config
 
-import by.jprof.telegram.opinions.news.config.TABLE_NEWS_QUEUE
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
