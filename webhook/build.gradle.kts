@@ -18,7 +18,7 @@ val intTestImplementation: Configuration by configurations.getting {
 configurations["intTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
 
 dependencies {
-    implementation(project(":voting"))
+    implementation(project(":youtube"))
     implementation(platform("com.fasterxml.jackson:jackson-bom:2.10.3"))
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.amazonaws:aws-lambda-java-events:2.2.7")

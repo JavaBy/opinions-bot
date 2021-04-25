@@ -4,6 +4,7 @@ import by.jprof.telegram.components.dao.require
 import by.jprof.telegram.components.dao.toAttributeValue
 import by.jprof.telegram.components.entity.DynamoAttrs
 import by.jprof.telegram.components.entity.DynamoEntity
+import by.jprof.telegram.opinions.news.entity.InsideJavaNewscastAttrs
 import by.jprof.telegram.opinions.news.entity.InsideJavaPodcastAttrs
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import java.time.Instant
@@ -34,23 +35,28 @@ data class QueueItem<T : DynamoAttrs>(
     )
 
     companion object : DynamoEntity<QueueItem<DynamoAttrs>> {
-        override fun deserialize(attrs: Map<String, AttributeValue>): QueueItem<DynamoAttrs> {
-            val event = Event.valueOf(attrs.require("event").s())
-            if (event == Event.INSIDE_JAVA_PODCAST) {
-                return QueueItem(
+        override fun deserialize(attrs: Map<String, AttributeValue>): QueueItem<DynamoAttrs> =
+            Event.valueOf(attrs.require("event").s()).let { event ->
+                QueueItem(
                     event,
-                    InsideJavaPodcastAttrs.deserialize(attrs.require("payload").m()),
+                    when (event) {
+                        Event.INSIDE_JAVA_PODCAST -> {
+                            InsideJavaPodcastAttrs.deserialize(attrs.require("payload").m())
+                        }
+                        Event.INSIDE_JAVA_NEWSCAST -> {
+                            InsideJavaNewscastAttrs.deserialize(attrs.require("payload").m())
+                        }
+                    },
                     (attrs.require("createdAt").s().ifEmpty { null })?.let { Instant.parse(it) },
                     (attrs.require("processedAt").s().ifEmpty { null })?.let { Instant.parse(it) },
                     Instant.parse(attrs.require("queuedAt").s()),
                     attrs.require("processed").bool()
                 )
             }
-            throw IllegalStateException("Unexpected queue event $event. Attrs: $attrs")
-        }
     }
 }
 
 enum class Event {
-    INSIDE_JAVA_PODCAST
+    INSIDE_JAVA_PODCAST,
+    INSIDE_JAVA_NEWSCAST
 }

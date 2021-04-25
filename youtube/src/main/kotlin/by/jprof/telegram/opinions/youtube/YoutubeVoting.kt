@@ -1,6 +1,8 @@
-package by.jprof.telegram.opinions.voting
+package by.jprof.telegram.opinions.youtube
 
-import by.jprof.telegram.opinions.youtube.YoutubeDAO
+import by.jprof.telegram.opinions.voting.Votes
+import by.jprof.telegram.opinions.voting.VotesDAO
+import by.jprof.telegram.opinions.voting.votingKeyBoard
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.answers.answerCallbackQuery
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.edit.ReplyMarkup.editMessageReplyMarkup
@@ -32,7 +34,7 @@ class YoutubeVoting(
         private const val ACCEPTED_DISPLAY_LEN = 500
     }
 
-    fun sendVoteForVideoMessage(videoId: String, chatId: ChatId, messageId: MessageIdentifier) {
+    suspend fun sendVoteForVideoMessage(videoId: String, chatId: ChatId, messageId: MessageIdentifier? = null) {
         logger.debug("Youtube video id is: $videoId")
 
         val response = youTube.videos().list("snippet,statistics").setId(videoId).execute()

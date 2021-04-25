@@ -75,6 +75,9 @@ export class OpinionsStack extends cdk.Stack {
                 'YOUTUBE_API_TOKEN': props.youtubeToken,
                 'TABLE_NEWS_QUEUE': newsQueueTable.tableName,
                 'TABLE_CHATS': chatsTable.tableName,
+                'TABLE_VOTES': votesTable.tableName,
+                'TABLE_KEYBOARDS': keyboardsTable.tableName,
+                'TABLE_YOUTUBE_CHANNELS_WHITELIST': youtubeChannelsWhitelistTable.tableName,
             },
         });
 
@@ -84,6 +87,9 @@ export class OpinionsStack extends cdk.Stack {
         kotlinMentionsTable.grantReadWriteData(lambdaFunctionWebhook);
         newsQueueTable.grantReadWriteData(lambdaFunctionInsideJava)
         chatsTable.grantReadWriteData(lambdaFunctionInsideJava)
+        votesTable.grantReadWriteData(lambdaFunctionInsideJava)
+        keyboardsTable.grantReadWriteData(lambdaFunctionInsideJava)
+        youtubeChannelsWhitelistTable.grantReadWriteData(lambdaFunctionInsideJava)
 
         const api = new apigateway.RestApi(this, 'opinions-bot', {
             restApiName: 'opinions-bot',

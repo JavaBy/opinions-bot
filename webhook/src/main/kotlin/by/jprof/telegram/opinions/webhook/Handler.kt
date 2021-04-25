@@ -10,9 +10,9 @@ import by.jprof.telegram.opinions.webhook.config.envModule
 import by.jprof.telegram.opinions.webhook.config.jsonModule
 import by.jprof.telegram.opinions.webhook.config.pipelineModule
 import by.jprof.telegram.opinions.webhook.processors.UpdateProcessingPipeline
+import by.jprof.telegram.opinions.youtube.config.youtubeBeansModule
 import by.jprof.telegram.opinions.youtube.config.youtubeDynamoModule
 import by.jprof.telegram.opinions.youtube.config.youtubeEnvModule
-import by.jprof.telegram.opinions.youtube.config.youtubeModule
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent
@@ -47,7 +47,7 @@ class Handler : RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyR
                 dynamoModule,
                 jsonModule,
                 youtubeDynamoModule,
-                youtubeModule,
+                youtubeBeansModule,
                 pipelineModule
             )
         }

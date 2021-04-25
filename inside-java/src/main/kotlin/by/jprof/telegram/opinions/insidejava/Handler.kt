@@ -13,6 +13,11 @@ import by.jprof.telegram.opinions.publication.Publisher
 import by.jprof.telegram.opinions.publication.config.publicationBeansModule
 import by.jprof.telegram.opinions.publication.config.publicationDynamoModule
 import by.jprof.telegram.opinions.publication.config.publicationEnvModule
+import by.jprof.telegram.opinions.voting.config.votingBeans
+import by.jprof.telegram.opinions.voting.config.votingEnvModule
+import by.jprof.telegram.opinions.youtube.config.youtubeBeansModule
+import by.jprof.telegram.opinions.youtube.config.youtubeDynamoModule
+import by.jprof.telegram.opinions.youtube.config.youtubeEnvModule
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.ScheduledEvent
@@ -26,15 +31,23 @@ class Handler : RequestHandler<ScheduledEvent, Unit>, KoinComponent {
             modules(
                 componentsEnvModule,
                 newsQueueEnvModule,
+                votingEnvModule,
+                youtubeEnvModule,
                 publicationEnvModule,
-                componentsTelegramModule,
+                envModule,
+
                 componentsDynamoModule,
                 newsQueueDynamoModule,
+                youtubeDynamoModule,
                 publicationDynamoModule,
-                publicationBeansModule,
-                envModule,
                 dynamoModule,
-                rssModule
+
+                componentsTelegramModule,
+                rssModule,
+
+                publicationBeansModule,
+                youtubeBeansModule,
+                votingBeans,
             )
         }
     }

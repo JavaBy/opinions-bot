@@ -1,6 +1,6 @@
 package by.jprof.telegram.opinions.webhook.processors
 
-import by.jprof.telegram.opinions.voting.YoutubeVoting
+import by.jprof.telegram.opinions.youtube.YoutubeVoting
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.TextLinkTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.URLTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.abstracts.ContentMessage
@@ -39,7 +39,7 @@ class YoutubeLinksProcessor(
         }
     }
 
-    private fun processMessage(update: MessageUpdate) {
+    private suspend fun processMessage(update: MessageUpdate) {
         logger.debug("Processing the message {}", update)
 
         val videoIds = extractYoutubeVideoIds(update)
