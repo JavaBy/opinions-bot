@@ -31,13 +31,13 @@ export class OpinionsStack extends cdk.Stack {
             partitionKey: {name: 'chatId', type: dynamodb.AttributeType.STRING},
             billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
         });
-        const newsQueueJavaTable = new dynamodb.Table(this, 'news-queue', {
+        const newsQueueTable = new dynamodb.Table(this, 'news-queue', {
             tableName: 'news-queue',
             partitionKey: {name: 'event', type: dynamodb.AttributeType.STRING},
             sortKey: {name: 'queuedAt', type: dynamodb.AttributeType.STRING},
             billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
         });
-        const chatsJavaTable = new dynamodb.Table(this, 'chats', {
+        const chatsTable = new dynamodb.Table(this, 'chats', {
             tableName: 'chats',
             partitionKey: {name: 'event', type: dynamodb.AttributeType.STRING},
             sortKey: {name: 'chatId', type: dynamodb.AttributeType.STRING},
@@ -73,8 +73,8 @@ export class OpinionsStack extends cdk.Stack {
                 'LOG_THRESHOLD': 'DEBUG',
                 'TELEGRAM_BOT_TOKEN': props.telegramToken,
                 'YOUTUBE_API_TOKEN': props.youtubeToken,
-                'TABLE_NEWS_QUEUE': newsQueueJavaTable.tableName,
-                'TABLE_CHATS': chatsJavaTable.tableName,
+                'TABLE_NEWS_QUEUE': newsQueueTable.tableName,
+                'TABLE_CHATS': chatsTable.tableName,
             },
         });
 
@@ -82,8 +82,8 @@ export class OpinionsStack extends cdk.Stack {
         keyboardsTable.grantReadData(lambdaFunctionWebhook);
         youtubeChannelsWhitelistTable.grantReadData(lambdaFunctionWebhook);
         kotlinMentionsTable.grantReadWriteData(lambdaFunctionWebhook);
-        newsQueueJavaTable.grantReadWriteData(lambdaFunctionInsideJava)
-        chatsJavaTable.grantReadWriteData(lambdaFunctionInsideJava)
+        newsQueueTable.grantReadWriteData(lambdaFunctionInsideJava)
+        chatsTable.grantReadWriteData(lambdaFunctionInsideJava)
 
         const api = new apigateway.RestApi(this, 'opinions-bot', {
             restApiName: 'opinions-bot',
