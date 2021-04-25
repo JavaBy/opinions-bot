@@ -107,7 +107,7 @@ export class OpinionsStack extends cdk.Stack {
 
         const rule = new events.Rule(this, 'opinions-inside-java-rule', {
             ruleName: 'opinions-inside-java-rule',
-            schedule: events.Schedule.expression('cron(0/5 * ? * * *)')
+            schedule: events.Schedule.expression('cron(0 * ? * * *)')
         })
 
         rule.addTarget(new targets.LambdaFunction(lambdaFunctionInsideJava));
