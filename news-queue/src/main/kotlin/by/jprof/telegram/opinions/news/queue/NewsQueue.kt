@@ -41,29 +41,6 @@ class NewsQueue(
         }.await()
     }
 
-    suspend fun isProcessed(item: QueueItem<*>): Boolean? {
-        return dynamoDb.query {
-            it.tableName(table)
-            it.expressionAttributeNames(
-                mapOf(
-                    "#event" to "event",
-                    "#processed" to "processed",
-                    "#businessKey" to "businessKey"
-                )
-            )
-            it.expressionAttributeValues(
-                mapOf(
-                    ":event" to item.event.name.toAttributeValue(),
-                    ":processed" to AttributeValue.builder().bool(false).build(),
-                    ":businessKey" to item.businessKey().toAttributeValue()
-                )
-            )
-            it.keyConditionExpression("#event = :event")
-            it.filterExpression("#businessKey = :businessKey")
-        }?.await()?.hasItems()
-    }
-
-
     suspend fun <T : DynamoAttrs> news(event: Event): List<QueueItem<T>> {
         return dynamoDb.query {
             it.tableName(table)
@@ -88,9 +65,11 @@ class NewsQueue(
     suspend fun <T : DynamoAttrs> findAll(event: Event): List<QueueItem<T>> {
         return dynamoDb.query {
             it.tableName(table)
-            it.expressionAttributeNames(mapOf(
-                "#event" to "event"
-            ))
+            it.expressionAttributeNames(
+                mapOf(
+                    "#event" to "event"
+                )
+            )
             it.expressionAttributeValues(
                 mapOf(
                     ":event" to event.name.toAttributeValue(),
