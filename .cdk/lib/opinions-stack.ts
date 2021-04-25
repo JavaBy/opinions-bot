@@ -33,7 +33,7 @@ export class OpinionsStack extends cdk.Stack {
         });
         const newsQueueJavaTable = new dynamodb.Table(this, 'news-queue', {
             tableName: 'news-queue',
-            partitionKey: {name: 'kind', type: dynamodb.AttributeType.STRING},
+            partitionKey: {name: 'event', type: dynamodb.AttributeType.STRING},
             sortKey: {name: 'queuedAt', type: dynamodb.AttributeType.STRING},
             billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
         });
