@@ -2,7 +2,6 @@ package by.jprof.telegram.opinions.insidejava
 
 import by.jprof.telegram.components.config.componentsDynamoModule
 import by.jprof.telegram.components.config.componentsEnvModule
-import by.jprof.telegram.components.config.componentsTelegramModule
 import by.jprof.telegram.opinions.insidejava.config.dynamoModule
 import by.jprof.telegram.opinions.insidejava.config.envModule
 import by.jprof.telegram.opinions.insidejava.config.rssModule
@@ -21,7 +20,6 @@ class Handler : RequestHandler<ScheduledEvent, Unit>, KoinComponent {
         startKoin {
             modules(
                 componentsEnvModule,
-                componentsTelegramModule,
                 componentsDynamoModule,
                 newsQueueEnvModule,
                 newsQueueDynamoModule,
