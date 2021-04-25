@@ -33,7 +33,7 @@ class TelegramPublisher(
 
     private suspend fun <T : DynamoAttrs> publishFirstEvent(
         event: Event,
-        poster: suspend (chatId: ChatAttrs, QueueItem<T>) -> Unit
+        poster: suspend (chat: ChatAttrs, QueueItem<T>) -> Unit
     ): Boolean {
         val eligibleChats = chats.findAll(event)
         if (eligibleChats.isEmpty()) {
