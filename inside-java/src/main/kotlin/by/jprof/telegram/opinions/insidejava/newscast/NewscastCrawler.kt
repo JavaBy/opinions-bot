@@ -19,7 +19,7 @@ class NewscastCrawler(
     }
 
     override suspend fun produce() {
-        val news = queue.news<InsideJavaNewscastAttrs>(Event.INSIDE_JAVA_NEWSCAST)
+        val news = queue.findAll<InsideJavaNewscastAttrs>(Event.INSIDE_JAVA_NEWSCAST)
         val videoIds = news.map { it.payload.videoId }
         val playlist = youtube.playlistItems().list("contentDetails");
         playlist.playlistId = ID
