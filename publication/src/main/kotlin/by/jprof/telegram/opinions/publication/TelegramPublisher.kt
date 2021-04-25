@@ -46,9 +46,7 @@ class TelegramPublisher(
                     logger.info("Publish {} to {}", anews, chat)
                     poster(chat, anews)
                 }
-                if (eligibleChats.isNotEmpty()) {
-                    queue.markProcessed(anews)
-                }
+                queue.markProcessed(anews)
                 return true
             }
     }
