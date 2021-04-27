@@ -1,6 +1,6 @@
 package by.jprof.telegram.opinions.webhook.processors
 
-import by.jprof.telegram.opinions.youtube.YoutubeVoting
+import by.jprof.telegram.opinions.voting.YoutubeVoting
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.TextLinkTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.MessageEntity.textsources.URLTextSource
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.abstracts.ContentMessage

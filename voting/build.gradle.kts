@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    api(project(":components"))
+    api(project(":youtube"))
 }

@@ -5,7 +5,7 @@ import by.jprof.telegram.opinions.news.entity.InsideJavaNewscastAttrs
 import by.jprof.telegram.opinions.news.entity.InsideJavaPodcastAttrs
 import by.jprof.telegram.opinions.news.queue.Event
 import by.jprof.telegram.opinions.news.queue.NewsQueue
-import by.jprof.telegram.opinions.youtube.YoutubeVoting
+import by.jprof.telegram.opinions.voting.YoutubeVoting
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.media.sendPhoto
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.sendMessage
