@@ -32,9 +32,11 @@ class PodcastCrawler(
         val podcasts: List<QueueItem<InsideJavaPodcastAttrs>> =
             queue.findAll(Event.INSIDE_JAVA_PODCAST)
         val guids = podcasts.map { it.payload.guid }
-        rss.items?.filterNot {
-            guids.contains(it.guid?.value ?: "")
-        }?.forEach { item ->
+        rss.items?.forEach { item ->
+            if (item.guid?.value?.let{ guids.contains(it) } ?: false) {
+                return@forEach
+            }
+
             val image = item.image
             val title = item.title ?: "New Inside Java episode!"
             val summary = item.summary
@@ -52,8 +54,12 @@ class PodcastCrawler(
 
             val guid = item.guid?.value ?: run {
                 logger.warn("Item {} doesn't have a GUID!. Infer GUID from text {}", item, text)
-                Base64.getEncoder().encode(text.encodeToByteArray())
+                val effectiveGuid = Base64.getEncoder().encode(text.encodeToByteArray())
                     .toString(StandardCharsets.UTF_8).take(32)
+                if (guids.contains(effectiveGuid)) {
+                    return@forEach
+                }
+                effectiveGuid
             }
 
             val queueItem = QueueItem(
