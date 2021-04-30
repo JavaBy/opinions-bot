@@ -13,6 +13,7 @@ val publicationBeansModule = module {
             get(),
             get(),
             get(),
+            get(),
         )
     } bind Publisher::class
 }

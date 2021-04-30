@@ -3,8 +3,10 @@ package by.jprof.telegram.opinions.publication
 import by.jprof.telegram.components.entity.DynamoAttrs
 import by.jprof.telegram.opinions.news.entity.InsideJavaNewscastAttrs
 import by.jprof.telegram.opinions.news.entity.InsideJavaPodcastAttrs
+import by.jprof.telegram.opinions.news.entity.JepAttrs
 import by.jprof.telegram.opinions.news.queue.Event
 import by.jprof.telegram.opinions.news.queue.NewsQueue
+import by.jprof.telegram.opinions.voting.JEPLinksVoting
 import by.jprof.telegram.opinions.voting.YoutubeVoting
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.media.sendPhoto
@@ -19,6 +21,7 @@ class TelegramPublisher(
     val queue: NewsQueue,
     val chats: ChatDao,
     val youtubeVoting: YoutubeVoting,
+    val jepVoting: JEPLinksVoting,
     val bot: RequestsExecutor
 ) : Publisher {
     companion object {
@@ -28,6 +31,7 @@ class TelegramPublisher(
     override suspend fun publish() {
         publishOneNews(Event.INSIDE_JAVA_PODCAST, this::announcePodcast)
                 || publishOneNews(Event.INSIDE_JAVA_NEWSCAST, this::announceNewscast)
+                || publishOneNews(Event.JEP, this::announceJep)
     }
 
     private suspend fun <T : DynamoAttrs> publishOneNews(
@@ -35,19 +39,20 @@ class TelegramPublisher(
         poster: suspend (ChatAttrs, T) -> Unit
     ): Boolean {
         val eligibleChats = chats.findAll(event)
-        if (eligibleChats.isEmpty()) {
-            return false
-        }
-        return queue.news<T>(event)
+        return eligibleChats.isNotEmpty() && queue.news<T>(event)
             .sortedByDescending { it.createdAt ?: it.queuedAt }
-            .any { anews ->
+            .any { news ->
                 eligibleChats.forEach { chat ->
-                    logger.info("Publish {} to {}", anews, chat)
-                    poster(chat, anews.payload)
+                    logger.info("Publish {} to {}", news, chat)
+                    poster(chat, news.payload)
                 }
-                queue.markProcessed(anews)
+                queue.markProcessed(news)
                 return true
             }
+    }
+
+    private suspend fun announceJep(chat: ChatAttrs, item: JepAttrs) {
+        jepVoting.sendVoteForJep(chat.chatId.toLong().toChatId(), item.jep)
     }
 
     private suspend fun announceNewscast(chat: ChatAttrs, item: InsideJavaNewscastAttrs) {

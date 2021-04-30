@@ -16,7 +16,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 class PodcastCrawler(
-    private val rssUrl: String,
+    private val rssLink: URL,
     private val parser: ITunesParser,
     private val queue: NewsQueue
 ) : Producer {
@@ -28,13 +28,15 @@ class PodcastCrawler(
     }
 
     override suspend fun produce() {
-        val rss = parser.parse(URL(rssUrl).readText())
+        val rss = parser.parse(rssLink.readText())
         val podcasts: List<QueueItem<InsideJavaPodcastAttrs>> =
             queue.findAll(Event.INSIDE_JAVA_PODCAST)
         val guids = podcasts.map { it.payload.guid }
         rss.items?.forEach { item ->
-            if (item.guid?.value?.let{ guids.contains(it) } ?: false) {
-                return@forEach
+            item.guid?.value?.let {
+                if (guids.contains(it)) {
+                    return@forEach
+                }
             }
 
             val image = item.image

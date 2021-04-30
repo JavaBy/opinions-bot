@@ -29,7 +29,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.9")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.0-RC")
     implementation("com.google.api-client:google-api-client:1.23.0")
-    implementation("org.jsoup:jsoup:1.13.1")
 
     testImplementation(platform("org.junit:junit-bom:5.6.0"))
     testRuntimeOnly(platform("org.junit:junit-bom:5.6.0"))

@@ -3,10 +3,7 @@ plugins {
     `java-library`
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     api(project(":youtube"))
+    api("org.jsoup:jsoup:1.13.1")
 }

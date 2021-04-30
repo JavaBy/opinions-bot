@@ -4,7 +4,6 @@ import by.jprof.telegram.components.config.componentsDynamoModule
 import by.jprof.telegram.components.config.componentsEnvModule
 import by.jprof.telegram.components.config.componentsTelegramModule
 import by.jprof.telegram.opinions.insidejava.config.dynamoModule
-import by.jprof.telegram.opinions.insidejava.config.envModule
 import by.jprof.telegram.opinions.insidejava.config.rssModule
 import by.jprof.telegram.opinions.news.config.newsQueueDynamoModule
 import by.jprof.telegram.opinions.news.config.newsQueueEnvModule
@@ -34,7 +33,6 @@ class Handler : RequestHandler<ScheduledEvent, Unit>, KoinComponent {
                 votingEnvModule,
                 youtubeEnvModule,
                 publicationEnvModule,
-                envModule,
 
                 componentsDynamoModule,
                 newsQueueDynamoModule,
