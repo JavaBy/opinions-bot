@@ -10,7 +10,7 @@ fun String.toAttributeValue(): AttributeValue = AttributeValue.builder().s(this)
 
 fun <T : Number> T.toAttributeValue(): AttributeValue = AttributeValue.builder().n(this.toString()).build()
 
-fun <T : Collection<String>> T.toAttributeValue(): AttributeValue = AttributeValue.builder().ss(this).build()
+fun Collection<String>.toAttributeValue(): AttributeValue = AttributeValue.builder().ss(this).build()
 
 fun Map<String, AttributeValue>.toAttributeValue() = AttributeValue.builder().m(this).build()
 
