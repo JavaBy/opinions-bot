@@ -1,4 +1,4 @@
-package by.jprof.telegram.opinions.insidejava.jeps
+package by.jprof.telegram.opinions.insidejava
 
 import by.jprof.telegram.opinions.news.entity.JepAttrs
 import by.jprof.telegram.opinions.news.produce.Producer

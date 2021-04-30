@@ -1,8 +1,8 @@
 package by.jprof.telegram.opinions.insidejava.config
 
-import by.jprof.telegram.opinions.insidejava.jeps.JepsCrawler
-import by.jprof.telegram.opinions.insidejava.newscast.NewscastCrawler
-import by.jprof.telegram.opinions.insidejava.podcast.PodcastCrawler
+import by.jprof.telegram.opinions.insidejava.JepsCrawler
+import by.jprof.telegram.opinions.insidejava.NewscastCrawler
+import by.jprof.telegram.opinions.insidejava.PodcastCrawler
 import by.jprof.telegram.opinions.news.produce.Producer
 import by.jprof.telegram.opinions.rssparser.FeedParser
 import by.jprof.telegram.opinions.rssparser.FeedType
