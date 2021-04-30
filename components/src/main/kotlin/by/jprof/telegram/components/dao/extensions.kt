@@ -15,7 +15,7 @@ fun Collection<String>.toAttributeValue(): AttributeValue = AttributeValue.build
 fun Map<String, AttributeValue>.toAttributeValue() = AttributeValue.builder().m(this).build()
 
 fun Map<String, AttributeValue>.require(attr: String, message: String? = null): AttributeValue {
-    return this[attr] ?: throw IllegalStateException(message ?: "Missing '$attr' attribute!. Attrs: $this")
+    return this[attr] ?: throw IllegalStateException(message ?: "Missing '$attr' attribute!. Attrs: ${this.keys}")
 }
 
 fun Update.asText(): TextContent? {
