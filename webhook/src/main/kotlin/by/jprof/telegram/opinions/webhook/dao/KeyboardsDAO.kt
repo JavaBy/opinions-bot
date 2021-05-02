@@ -1,5 +1,6 @@
 package by.jprof.telegram.opinions.webhook.dao
 
+import by.jprof.telegram.components.dao.toAttributeValue
 import by.jprof.telegram.opinions.webhook.entity.Keyboard
 import by.jprof.telegram.opinions.webhook.entity.toKeyboard
 import kotlinx.coroutines.future.await

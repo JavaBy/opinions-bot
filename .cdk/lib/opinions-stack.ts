@@ -31,9 +31,16 @@ export class OpinionsStack extends cdk.Stack {
             partitionKey: {name: 'chatId', type: dynamodb.AttributeType.STRING},
             billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
         });
-        const insideJavaTable = new dynamodb.Table(this, 'opinions-inside-java', {
-            tableName: 'opinions-inside-java',
-            partitionKey: {name: 'chatId', type: dynamodb.AttributeType.STRING},
+        const newsQueueTable = new dynamodb.Table(this, 'news-queue', {
+            tableName: 'news-queue',
+            partitionKey: {name: 'event', type: dynamodb.AttributeType.STRING},
+            sortKey: {name: 'queuedAt', type: dynamodb.AttributeType.STRING},
+            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+        });
+        const chatsTable = new dynamodb.Table(this, 'chats', {
+            tableName: 'chats',
+            partitionKey: {name: 'event', type: dynamodb.AttributeType.STRING},
+            sortKey: {name: 'chatId', type: dynamodb.AttributeType.STRING},
             billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
         });
 
@@ -51,21 +58,26 @@ export class OpinionsStack extends cdk.Stack {
                 'TABLE_VOTES': votesTable.tableName,
                 'TABLE_KEYBOARDS': keyboardsTable.tableName,
                 'TABLE_YOUTUBE_CHANNELS_WHITELIST': youtubeChannelsWhitelistTable.tableName,
-                'TABLE_KOTLIN_MENTIONS': kotlinMentionsTable.tableName,
+                'TABLE_KOTLIN_MENTIONS': kotlinMentionsTable.tableName
             },
         });
 
-        const lambdaFunctionInsideJavaPodcastPoster = new lambda.Function(this, 'opinions-inside-java-podcast-poster', {
-            functionName: 'opinions-inside-java-podcast-poster',
+        const lambdaFunctionInsideJava = new lambda.Function(this, 'opinions-inside-java-lambda', {
+            functionName: 'opinions-inside-java-lambda',
             runtime: lambda.Runtime.JAVA_11,
             timeout: Duration.seconds(30),
             memorySize: 1024,
-            code: lambda.Code.fromAsset('../inside-java-podcast-poster/build/libs/opinions-bot-inside-java-podcast-poster-all.jar'),
+            code: lambda.Code.fromAsset('../inside-java/build/libs/opinions-bot-inside-java-all.jar'),
             handler: 'by.jprof.telegram.opinions.insidejava.Handler',
             environment: {
                 'LOG_THRESHOLD': 'DEBUG',
                 'TELEGRAM_BOT_TOKEN': props.telegramToken,
-                'TABLE_INSIDE_JAVA_PODCAST': insideJavaTable.tableName,
+                'YOUTUBE_API_TOKEN': props.youtubeToken,
+                'TABLE_NEWS_QUEUE': newsQueueTable.tableName,
+                'TABLE_CHATS': chatsTable.tableName,
+                'TABLE_VOTES': votesTable.tableName,
+                'TABLE_KEYBOARDS': keyboardsTable.tableName,
+                'TABLE_YOUTUBE_CHANNELS_WHITELIST': youtubeChannelsWhitelistTable.tableName,
             },
         });
 
@@ -73,7 +85,11 @@ export class OpinionsStack extends cdk.Stack {
         keyboardsTable.grantReadData(lambdaFunctionWebhook);
         youtubeChannelsWhitelistTable.grantReadData(lambdaFunctionWebhook);
         kotlinMentionsTable.grantReadWriteData(lambdaFunctionWebhook);
-        insideJavaTable.grantReadWriteData(lambdaFunctionInsideJavaPodcastPoster)
+        newsQueueTable.grantReadWriteData(lambdaFunctionInsideJava)
+        chatsTable.grantReadWriteData(lambdaFunctionInsideJava)
+        votesTable.grantReadWriteData(lambdaFunctionInsideJava)
+        keyboardsTable.grantReadWriteData(lambdaFunctionInsideJava)
+        youtubeChannelsWhitelistTable.grantReadWriteData(lambdaFunctionInsideJava)
 
         const api = new apigateway.RestApi(this, 'opinions-bot', {
             restApiName: 'opinions-bot',
@@ -89,11 +105,11 @@ export class OpinionsStack extends cdk.Stack {
 
         api.root.addResource(props.telegramToken.replace(':', '_')).addMethod('POST', new apigateway.LambdaIntegration(lambdaFunctionWebhook));
 
-        const rule = new events.Rule(this, 'opinions-inside-java-podcast-poster-rule', {
-            ruleName: 'opinions-inside-java-podcast-poster-rule',
+        const rule = new events.Rule(this, 'opinions-inside-java-rule', {
+            ruleName: 'opinions-inside-java-rule',
             schedule: events.Schedule.expression('cron(0 * ? * * *)')
         })
 
-        rule.addTarget(new targets.LambdaFunction(lambdaFunctionInsideJavaPodcastPoster));
+        rule.addTarget(new targets.LambdaFunction(lambdaFunctionInsideJava));
     }
 }

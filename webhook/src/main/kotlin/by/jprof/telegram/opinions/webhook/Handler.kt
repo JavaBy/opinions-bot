@@ -1,12 +1,18 @@
 package by.jprof.telegram.opinions.webhook
 
+import by.jprof.telegram.components.config.componentsDynamoModule
+import by.jprof.telegram.components.config.componentsEnvModule
+import by.jprof.telegram.components.config.componentsTelegramModule
+import by.jprof.telegram.opinions.voting.config.votingBeans
+import by.jprof.telegram.opinions.voting.config.votingEnvModule
 import by.jprof.telegram.opinions.webhook.config.dynamoModule
 import by.jprof.telegram.opinions.webhook.config.envModule
 import by.jprof.telegram.opinions.webhook.config.jsonModule
 import by.jprof.telegram.opinions.webhook.config.pipelineModule
-import by.jprof.telegram.opinions.webhook.config.telegramModule
-import by.jprof.telegram.opinions.webhook.config.youtubeModule
 import by.jprof.telegram.opinions.webhook.processors.UpdateProcessingPipeline
+import by.jprof.telegram.opinions.youtube.config.youtubeBeansModule
+import by.jprof.telegram.opinions.youtube.config.youtubeDynamoModule
+import by.jprof.telegram.opinions.youtube.config.youtubeEnvModule
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent
@@ -30,7 +36,20 @@ class Handler : RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyR
 
     init {
         startKoin {
-            modules(envModule, jsonModule, dynamoModule, youtubeModule, telegramModule, pipelineModule)
+            modules(
+                envModule,
+                componentsEnvModule,
+                youtubeEnvModule,
+                votingEnvModule,
+                componentsDynamoModule,
+                componentsTelegramModule,
+                votingBeans,
+                dynamoModule,
+                jsonModule,
+                youtubeDynamoModule,
+                youtubeBeansModule,
+                pipelineModule
+            )
         }
     }
 

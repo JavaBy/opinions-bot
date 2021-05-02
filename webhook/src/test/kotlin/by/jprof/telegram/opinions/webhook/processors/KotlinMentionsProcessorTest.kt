@@ -1,7 +1,7 @@
 package by.jprof.telegram.opinions.webhook.processors
 
-import by.jprof.telegram.opinions.dao.KotlinMentionsDAO
-import by.jprof.telegram.opinions.entity.KotlinMention
+import by.jprof.telegram.opinions.webhook.dao.KotlinMentionsDAO
+import by.jprof.telegram.opinions.webhook.entity.KotlinMention
 import com.github.insanusmokrassar.TelegramBotAPI.CommonAbstracts.TextPart
 import com.github.insanusmokrassar.TelegramBotAPI.bot.RequestsExecutor
 import com.github.insanusmokrassar.TelegramBotAPI.extensions.api.send.media.sendSticker
@@ -20,7 +20,6 @@ import com.github.insanusmokrassar.TelegramBotAPI.types.message.abstracts.Conten
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.TextContent
 import com.github.insanusmokrassar.TelegramBotAPI.types.message.content.media.StickerContent
 import com.github.insanusmokrassar.TelegramBotAPI.types.update.MessageUpdate
-import com.github.insanusmokrassar.TelegramBotAPI.utils.TelegramAPIUrlsKeeper
 import com.soywiz.klock.DateTime
 import io.mockk.coEvery
 import io.mockk.coVerify

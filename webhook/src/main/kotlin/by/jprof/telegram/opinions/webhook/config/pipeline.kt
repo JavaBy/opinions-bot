@@ -16,11 +16,11 @@ val pipelineModule = module {
     }
 
     single<UpdateProcessor>(named("JEPLinksProcessor")) {
-        JEPLinksProcessor(get(), get())
+        JEPLinksProcessor(get())
     }
 
     single<UpdateProcessor>(named("YoutubeLinksProcessor")) {
-        YoutubeLinksProcessor(get(), get(), get(), get())
+        YoutubeLinksProcessor(get())
     }
 
     single<UpdateProcessor>(named("KotlinMentionsProcessor")) {
